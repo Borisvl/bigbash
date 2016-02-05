@@ -1,0 +1,19 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title">Age Group Code Filter</h4>
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <label class="control-label col-lg-3" for="excludeAgeGroup">Should exclude:</label>
+
+            <input id="excludeAgeGroup" class="checkbox-inline" type="checkbox" ng-model="filters.ageGroupCodeFilter.exclude">
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox col-lg-3" ng-repeat="ageGroup in ageGroups">
+                <input type="checkbox" checklist-model="filters.ageGroupCodeFilter.ageGroups"
+                       checklist-value="ageGroup.value"> {{ageGroup.name}}
+            </label>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,46 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title">AB-Upselling</h4>
+    </div>
+    <div class="panel-body">
+
+        <div class="well">scoring_function(reco) = reco_click_probability &times;
+            buy_probability ^ &alpha; &times; price_contribution ^ &beta;</div>
+
+        <div class="form-group col-lg-2">
+            <label>Parameters range: </label>
+        </div>
+
+        <div class="form-group col-lg-2">
+            <label class="col-lg-4 text-right" for="min">Min</label>
+
+            <div class="col-lg-8">
+                <input class="form-control" ng-model="scoringFunctions.abUpsell.min" type="text" id="min">
+            </div>
+        </div>
+
+        <div class="form-group col-lg-2">
+            <label class="col-lg-4 text-right" for="max">Max</label>
+
+            <div class="col-lg-8">
+                <input class="form-control" ng-model="scoringFunctions.abUpsell.max" type="text" id="max">
+            </div>
+        </div>
+
+        <div class="form-group col-lg-2">
+            <label class="col-lg-4 text-right" for="step">Step</label>
+
+            <div class="col-lg-8">
+                <input class="form-control" ng-model="scoringFunctions.abUpsell.step" type="text" id="step">
+            </div>
+        </div>
+
+        <div class="form-group col-lg-4">
+            <label class="col-lg-10 text-right" for="test">Use test buy probabilities:</label>
+
+            <div class="col-lg-2">
+                <input type="checkbox" ng-model="scoringFunctions.upsell.useTestBuyProb" id="test">
+            </div>
+        </div>
+    </div>
+</div>

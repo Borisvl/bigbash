@@ -1,0 +1,114 @@
+<div class="page-header col-lg-12">
+    <h3>Simulation app</h3>
+</div>
+
+<form name="queryForm" ng-submit="getRecos()" class="form-horizontal" ng-controller="SimFormCtrl" novalidate>
+    <div class="col-lg-12">
+        <div class="form-group col-lg-2" style="margin-right:5px" ng-class="{'has-error': queryForm.ad.$invalid}">
+            <label for="ad">App Domain:</label>
+
+            <select class="form-control col-lg-4" ng-model="queryParams.appDomain"
+                    ng-options="t.ad_id as t | appDomainName for t in appDomains"
+                    name="ad" id="ad"></select>
+        </div>
+
+        <div class="form-group col-lg-2" style="margin-right:5px"
+             ng-class="{'has-error': queryForm.recoContext.$invalid}">
+            <label for="recoContext" required>Reco Context:</label>
+
+            <select class="form-control col-lg-4" ng-model="queryParams.recoContext"
+                    ng-options="t.name as t.name for t in recoContexts"
+                    name="recoContext" id="recoContext" required></select>
+        </div>
+
+        <div class="form-group col-lg-1" ng-class="{'has-error': queryForm.nRecos.$invalid}">
+            <label for="nRecos">Nr Recos:</label>
+
+            <div class="col-lg-12">
+                <input class="form-control" ng-model="queryParams.nrRecos" type="text" name="nRecos" id="nRecos"
+                       required>
+            </div>
+        </div>
+
+        <div class="form-group col-lg-1">
+            <label for="enrich">Enrich:</label>
+
+            <div class="col-lg-12 align-center">
+                <div class="col-lg-4"></div>
+                <input class="text-right" ng-model="queryParams.enrich" type="checkbox" id="enrich">
+            </div>
+        </div>
+
+        <div class="form-group col-lg-1">
+            <label for="forceCascade">Force Cascade:</label>
+
+            <div class="col-lg-12 align-center">
+                <div class="col-lg-4"></div>
+                <input class="text-right" ng-model="queryParams.forceCascade" type="checkbox" id="forceCascade">
+            </div>
+        </div>
+
+        <div ng-hide="queryParams.forceCascade" class="form-group col-lg-4" style="margin-left:5px">
+            <label for="recoTypes">Reco Types:</label>
+
+            <select id="recoTypes"
+                    class="form-control"
+                    chosen
+                    multiple
+                    allow-single-deselect="true"
+                    ng-model="queryParams.recoTypes"
+                    ng-options="t.name as t.name for t in recoTypes">
+            </select>
+        </div>
+
+        <div ng-show="queryParams.forceCascade" class="form-group col-lg-4" style="margin-left:5px">
+            <label for="cascadeId">Cascade:</label>
+
+            <select class="form-control col-lg-4" ng-model="queryParams.cascadeId"
+                    ng-options="t.id as t | configName for t in cascades"
+                    id="cascadeId"></select>
+        </div>
+
+        <div class="col-lg-1 align-right" style="padding-top: 23px">
+            <button class="btn btn-primary" ng-disabled="queryForm.$invalid">Get</button>
+        </div>
+    </div>
+    <div style="margin-bottom:15px" class="col-lg-12" ng-class="{'has-error': queryForm.skus.$invalid}">
+        <label for="skus">SKUs:</label>
+        <input class="form-control" ng-model="queryParams.skus" type="text" name="skus" id="skus"
+               required>
+    </div>
+    <div class="col-lg-12">
+        <div class="col-lg-2" ng-repeat="baseItem in skusList track by $index">
+            <div data-ng-include data-src="'/ws/admin/src/sim-app/views/base-item.html'"></div>
+        </div>
+    </div>
+
+    <hr class="col-lg-12">
+
+    <div class="col-lg-6">
+        <tabset>
+            <tab ng-repeat="(recoType, recos) in recosMap" heading="{{recoType}}">
+                <div ng-hide="recos.success" class="alert alert-warning">
+                    {{recos.msg}}
+                </div>
+                <div ng-show="recos.success">
+                    <div style="padding-bottom:15px">
+                        <button class="btn btn-info" popover-trigger="mouseenter"
+                                popover="{{recos.trackingDto | pretty}}">TrackingDto
+                        </button>
+                        <a class="btn btn-info" popover-trigger="mouseenter" popover="{{abTestName(recos.trackingDto.AB_TEST_ID) | configName}}" target="_blank"
+                           href="/ws/config-app/app#/ab-test/view/{{recos.trackingDto.AB_TEST_ID}}">AB-Test</a>
+                        <a class="btn btn-info" popover-trigger="mouseenter" popover="{{cascadeName(recos.trackingDto.CASCADE_ID) | configName}}" target="_blank"
+                           href="/ws/config-app/app#/cascade/view/{{recos.trackingDto.CASCADE_ID}}">Cascade</a>
+                        <a class="btn btn-info" popover-trigger="mouseenter" popover="Reco request URL" target="_blank"
+                           href="{{recoUrl}}">Url</a>
+                    </div>
+                    <div class="col-lg-12" ng-repeat="reco in recos.recommendations">
+                        <div data-ng-include data-src="'/ws/admin/src/sim-app/views/reco.html'"></div>
+                    </div>
+                </div>
+            </tab>
+        </tabset>
+    </div>
+</form>

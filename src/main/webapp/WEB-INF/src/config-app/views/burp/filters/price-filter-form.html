@@ -1,0 +1,22 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title">Price Filter</h4>
+    </div>
+    <div class="panel-body">
+        <div class="form-group col-lg-7">
+            <label class="col-lg-6 text-right" for="priceLimit">Price limit (in cents):</label>
+
+            <div class="col-lg-6">
+                <input class="form-control" ng-model="filters.priceFilter.limit" type="text" id="priceLimit">
+            </div>
+        </div>
+
+        <div class="form-group col-lg-5">
+            <label class="col-lg-6 text-right" for="mandatory">Mandatory:</label>
+
+            <div class="col-lg-6">
+                <input type="checkbox" ng-model="filters.priceFilter.mandatory" id="mandatory">
+            </div>
+        </div>
+    </div>
+</div>

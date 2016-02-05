@@ -1,0 +1,47 @@
+<h3>Business Rules Configs</h3>
+<div class="col-lg-12">
+    <div class="col-lg-6">
+        <form class="form-inline">
+            <div class="row">
+                <div class="col-md-2">
+                    <button class="btn btn-default form-control" ng-click="newBurp()"><i class="fa fa-plus"></i> Add
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="archivedBurps" ng-change="refreshTable()" id="approved">
+                        Archived
+                    </label>
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th class="text-center">Id</th>
+                <th class="text-center">Name</th>
+                <th class="text-center">RecoType</th>
+                <th class="text-center">RecoEngine</th>
+                <th class="text-center">Approved</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="burp in burps">
+                <td class="text-center">{{burp.id}}</td>
+                <td><a ng-href="#burp/view/{{burp.id}}">{{burp.name}}</a></td>
+                <td>{{burp.recoType}}</td>
+                <td>{{burp.recoEngine}}</td>
+                <td class="text-center">
+                    <span ng-show="burp.approved" class="label label-success">
+                           <i class="fa fa-fw fa-check"></i>
+                    </span>
+                    <span ng-hide="burp.approved" class="label label-primary">
+                           <i class="fa fa-fw fa-times"></i>
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

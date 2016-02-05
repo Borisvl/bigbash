@@ -1,0 +1,571 @@
+-------------------------
+Create table t(string TEXT);
+Select 1+2*2 from t;
+< t
+line1
+>
+5
+-------------------------
+Create table t(string TEXT);
+Select 1/2 from t;
+< t
+line1
+>
+0.5
+-------------------------
+Create table t(string TEXT);
+Select 2*0.6 from t;
+< t
+line1
+>
+1.2
+-------------------------
+Create table t(string TEXT);
+Select substr(string,1,2), substr(string,3), substr(string,1,LENGTH(STRING)-2) from t;
+< t
+line1
+>
+li;ne1;lin
+-------------------------
+Create table t(string TEXT);
+Select 5%3 from t;
+< t
+line1
+>
+2
+-------------------------
+Create table t(string TEXT, string2 TEXT);
+Select * from t;
+< t
+line1;test
+line2;test
+>
+line1;test
+line2;test
+-------------------------
+Create table t(string TEXT, string2 TEXT);
+Select t.* from t;
+< t
+line1;test
+line2;test
+>
+line1;test
+line2;test
+-------------------------
+Create table t(string TEXT, string2 TEXT);
+Select * from t where string='line1';
+< t
+line1;test
+line2;test
+>
+line1;test
+-----------------------
+Create table t(string TEXT);
+Select * from t where string='line1' OR string='line2';
+< t
+line1
+line2
+>
+line1
+line2
+-----------------------
+Create table t(string TEXT, n INT);
+Select * from t where string='line1' AND n=1;
+< t
+line1;1
+line2;1
+line1;5
+line1;11
+>
+line1;1
+-----------------------
+Create table t(string TEXT, n INT);
+Select * from t where string='line1' AND n>=5;
+< t
+line1;1
+line2;1
+line1;5
+line1;11
+>
+line1;5
+line1;11
+-----------------------
+Create table t(string TEXT, n INT);
+Select * from t where (string='line1' AND n>=5) OR string='line3' OR (string = 'line1' AND n==1);
+< t
+line1;1
+line2;22
+line1;5
+line1;11
+line3;3
+>
+line1;1
+line1;5
+line1;11
+line3;3
+-----------------------
+Create table t(string TEXT, n INT);
+Select * from t where string REGEXP '.*2$';
+< t
+line1;1
+line2;1
+line21;5
+line1;11
+>
+line2;1
+-----------------------
+Create table t(string TEXT);
+Select count(*), count(DISTINCT string) from t;
+< t
+line1
+line1
+line2
+line1
+line1
+>
+5;2
+-----------------------
+Create table t(string TEXT, n INT);
+Select sum(2*n), 2*sum(n) from t;
+< t
+line1;1
+line2;2
+>
+6;6
+-----------------------
+Create table t(string TEXT, n INT);
+Select string from t group by string order by string;
+< t
+line1;1
+line2;1
+line1;3
+line4;1
+>
+line1
+line2
+line4
+-----------------------
+Create table t(string TEXT, n INT);
+Select group_concat(string) from t group by n;
+< t
+line1;1
+line2;1
+line1;3
+line4;1
+>
+line1,line2,line4
+line1
+-----------------------
+Create table t(string TEXT, n INT);
+Select group_concat(string,':') from t;
+< t
+line1;1
+line2;1
+line1;3
+line4;1
+>
+line1:line2:line1:line4
+-----------------------
+Create table t(string TEXT, n INT);
+Select group_concat(DISTINCT string,':') from t group by n order by n;
+< t
+line1;1
+line2;1
+line1;3
+line4;1
+line2;3
+line1;3
+line3;3
+>
+line1:line2:line4
+line1:line2:line3
+-----------------------
+Create table t(string TEXT, n INT);
+Select sum (n), min(n), max(n), count(*) from t where string='line1';
+< t
+line1;1
+line2;2
+line1;3
+line1;2
+>
+6;1;3;3
+-----------------------
+Create table t(string TEXT, n INT);
+Select string, count(*) from t group by string order by string;
+< t
+line1;1
+line2;2
+line1;3
+>
+line1;2
+line2;1
+-----------------------
+Create table t(string TEXT, n INT);
+Select string, sum(n), count(*) from t group by string order by string;
+< t
+line1;1
+line2;2
+line1;3
+>
+line1;4;2
+line2;2;1
+-----------------------
+Create table t(string TEXT, n INT);
+Select string, sum(n), count(*) from t group by string having count(*) > 1;
+< t
+line1;1
+line2;2
+line1;3
+>
+line1;4;2
+-----------------------
+Create table t(string TEXT, n INT);
+Select string, sum(n) from t group by string having ((count(*) > 1) OR SUM(n)=2);
+< t
+line1;1
+line2;2
+line1;3
+>
+line1;4
+line2;2
+-----------------------
+Create table t(string TEXT, n INT, n2 INT);
+Select string, sum(n2), count(*) from t group by n,string order by string;
+< t
+line1;1;4
+line1;1;5
+line1;3;2
+line2;1;1
+>
+line1;9;2
+line1;2;1
+line2;1;1
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select n2 from t2 join t on t.string = t2.string where n=1;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line1;11
+>
+11
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(other TEXT, string TEXT, n2 INT);
+Select n2 from t join t2 on t.string = t2.string where n=1;
+< t
+line1;1
+line2;2
+< t2
+o2;line2;22
+o1;line1;11
+>
+11
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select t.string, t2.string, n2 from t left join t2 on t.string = t2.string;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line3;21
+>
+line1;;
+line2;line2;22
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select N, t.string, t2.string, n2 from t hash left join t2 on t.string = t2.string;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line3;21
+>
+1;line1;;
+2;line2;line2;22
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select n2 from t left join t2 on t.string = t2.string where n=1 or n2>20;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line3;21
+>
+
+22
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select n2 from t join t2 on t.string = t2.string where n=1;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+>
+-----------------------
+Create table t(id1 INT, id2 INT, c INT);
+Create table t2(id INT, name TEXT);
+Select name,c from t join t2 on t.id1 = t2.id where id1=id2 order by name;
+< t
+1;1;5
+1;2;10
+1;3;1
+2;2;25
+< t2
+1;line1
+2;line2
+>
+line1;5
+line2;25
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select t.string, n, n2 from t join t2 on t.string = t2.string order by n, n2;
+< t
+line1;1
+line2;2
+line2;3
+< t2
+line2;22
+line2;25
+>
+line2;2;22
+line2;2;25
+line2;3;22
+line2;3;25
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select t.string, n, n2 from t left join t2 on t.string = t2.string order by n, n2;
+< t
+line1;1
+line2;2
+line2;3
+< t2
+line2;22
+line2;25
+>
+line1;1;
+line2;2;22
+line2;2;25
+line2;3;22
+line2;3;25
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select t.string, n, n2 from t left join t2 on t.string = t2.string where t2.n2 == '';
+< t
+line1;1
+line2;2
+line3;3
+< t2
+line2;22
+line2;25
+>
+line1;1;
+line3;3;
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select t.string, n, n2 from t hash left join t2 on t.string = t2.string where t2.n2 == '';
+< t
+line1;1
+line2;2
+line3;3
+< t2
+line2;22
+line2;25
+>
+line1;1;
+line3;3;
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select n2 from t2 hash join t on t.string = t2.string where n=1;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line1;11
+>
+11
+-----------------------
+Create table t(string TEXT UNIQUE, n INT);
+Create table t2(string TEXT, n2 INT);
+Select n2 from t2 hash join t on t.string = t2.string where n=1;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line1;11
+>
+11
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(other TEXT, string TEXT, n2 INT);
+Select n2 from t hash join t2 on t.string = t2.string where n=1;
+< t
+line1;1
+line2;2
+< t2
+o2;line2;22
+o1;line1;11
+>
+11
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select n2 from t hash left join t2 on t.string = t2.string where n=1 or n2>20;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line3;21
+>
+
+22
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT UNIQUE, n2 INT);
+Select n2 from t hash left join t2 on t.string = t2.string where n=1 or n2>20;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+line3;21
+>
+
+22
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select n2 from t hash join t2 on t.string = t2.string where n=1;
+< t
+line1;1
+line2;2
+< t2
+line2;22
+>
+-----------------------
+Create table t(id1 INT, id2 INT, c INT);
+Create table t2(id INT, name TEXT);
+Select name,c from t hash join t2 on t.id1 = t2.id where id1=id2 order by name;
+< t
+1;1;5
+1;2;10
+1;3;1
+2;2;25
+< t2
+1;line1
+2;line2
+>
+line1;5
+line2;25
+-----------------------
+Create table t(id1 INT, id2 INT, c INT);
+Create table t2(id INT UNIQUE, name TEXT);
+Select name,c from t hash join t2 on t.id1 = t2.id where id1=id2 order by name;
+< t
+1;1;5
+1;2;10
+1;3;1
+2;2;25
+< t2
+1;line1
+2;line2
+>
+line1;5
+line2;25
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select t.string, n, n2 from t hash join t2 on t.string = t2.string order by n, n2;
+< t
+line1;1
+line2;2
+line2;3
+< t2
+line2;22
+line2;25
+>
+line2;2;22
+line2;2;25
+line2;3;22
+line2;3;25
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select t.string, n, n2 from t hash left join t2 on t.string = t2.string order by n, n2;
+< t
+line1;1
+line2;2
+line2;3
+< t2
+line2;22
+line2;25
+>
+line1;1;
+line2;2;22
+line2;2;25
+line2;3;22
+line2;3;25
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Create table t3(string TEXT, n3 INT);
+Select t.string, n, n2, n3 from t hash join t2 on t.string = t2.string join t3 on t.string = t3.string;
+< t
+line1;1
+line2;2
+line2;3
+< t2
+line2;22
+line2;25
+< t3
+line2;1
+>
+line2;2;22;1
+line2;2;25;1
+line2;3;22;1
+line2;3;25;1
+-----------------------
+Create table t(string TEXT, n INT);
+Select substr(string, 5), count(*), sum(n) from t group by substr(string, 5);
+< t
+line1;1
+line2;2
+line3;3
+line2;1
+>
+1;1;1
+2;2;3
+3;1;3
+-----------------------
+Create table t(string TEXT, n INT);
+Select string from t order by substr(string, 6), 2*n;
+< t
+1line1;1
+2line2;2
+3line3;3
+4line2;1
+>
+1line1
+4line2
+2line2
+3line3
+-----------------------

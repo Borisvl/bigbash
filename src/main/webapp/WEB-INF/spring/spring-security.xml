@@ -1,0 +1,26 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+http://www.springframework.org/schema/security
+http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+
+    <http auto-config="true" use-expressions="true">
+        <intercept-url pattern="/ws/admin/xsell" access="permitAll" />
+
+
+        <http-basic />
+    </http>
+    <authentication-manager>
+        <authentication-provider>
+            <!-- <password-encoder hash="sha"> <salt-source system-wide="huhcs-recos" /> </password-encoder> -->
+            <!-- password="0325d403ae5ff9e8211c98c031b8333e5b641311" -->
+            <user-service>
+                <user name="huhcs"
+                    password="LBUP-r3c0s"
+                    authorities="user" />
+            </user-service>
+        </authentication-provider>
+    </authentication-manager>
+</beans:beans>

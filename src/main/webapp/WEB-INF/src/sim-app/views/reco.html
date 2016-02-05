@@ -1,0 +1,39 @@
+<div ng-show="reco.sku" class="col-lg-12">
+    <div class="col-lg-3">
+        <img ng-click="getSkuRecos(reco.sku)" ng-src="{{reco.fields.picture_url | imageUrl}}">
+        <div><a href="http://www.zalando.de/lookup/article/{{reco.sku}}" target="_blank">{{reco.sku}}</a></div>
+    </div>
+    <div class="col-lg-9">
+        <table class="table table-striped">
+            <tbody>
+            <tr>
+                <td class="col-lg-3">Reco Engine</td>
+                <td class="col-lg-9">{{reco.recoEngine}}</td>
+            </tr>
+            <tr>
+                <td>Score</td>
+                <td>{{reco.score}}</td>
+            </tr>
+            <tr>
+                <td>Brand</td>
+                <td>{{reco.fields.brand}}</td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td>{{reco.fields.name_de}}</td>
+            </tr>
+            <tr>
+                <td>Price</td>
+                <td>{{reco.fields.price}}</td>
+            </tr>
+            <tr>
+                <td>Gender</td>
+                <td>{{reco.fields.target_group_gender | lovName:gendersMap}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div ng-hide="reco.sku">
+    <h3><span class="label label-danger">Recommendation not available</span></h3>
+</div>

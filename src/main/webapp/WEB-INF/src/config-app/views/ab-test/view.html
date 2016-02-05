@@ -1,0 +1,76 @@
+<div class="col-lg-6">
+
+    <div class="page-header col-lg-12">
+        <div class="col-lg-4"><h3>AB-Test Config</h3></div>
+        <div class="col-lg-8 align-right">
+            <h3>
+                <span ng-show="abTest.approved" class="label label-success">Approved</span>
+                <span ng-hide="abTest.approved" class="label label-primary">Not Approved</span>
+                <span ng-show="abTest.archived" class="label label-warning">Archived</span>
+                <span ng-show="abTest.active" class="label label-info">Active</span>
+                <span ng-show="abTest.dflt" class="label label-danger">Default</span>
+            </h3>
+        </div>
+    </div>
+
+    <p class="col-lg-12">
+        <strong class="col-lg-3 strong align-right">Id:</strong>
+        <span class="col-lg-9">{{abTest.id}}</span>
+
+        <strong class="col-lg-3 strong align-right">Name:</strong>
+        <span class="col-lg-9">{{abTest.name}}</span>
+
+        <strong class="col-lg-3 strong align-right">App Domains:</strong>
+        <span class="col-lg-9">{{abTest.appDomain}}</span>
+
+        <strong class="col-lg-3 strong align-right">Reco Context:</strong>
+        <span class="col-lg-9">{{abTest.recoContext}}</span>
+
+        <strong class="col-lg-3 strong align-right">Reco Type:</strong>
+        <span class="col-lg-9">{{abTest.recoType}}</span>
+    </p>
+
+    <legend>Cascades</legend>
+    <span ng-show="abTest.distribution.length == 0">No Cascades</span>
+
+    <table class="table table-striped" ng-hide="abTest.distribution.length == 0">
+        <thead>
+        <tr>
+            <th class="text-center">Cascade</th>
+            <th class="text-center">Approved</th>
+            <th class="text-center">Share</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="cascade in abTest.distribution">
+            <td>
+                <a href="#/cascade/view/{{cascade.id}}">
+                    {{cascadeName[cascade.id].name}} ({{cascade.id}})
+                </a>
+            </td>
+            <td class="text-center">
+                    <span ng-show="cascadeName[cascade.id].approved" class="label label-success">
+                           <i class="fa fa-fw fa-check"></i>
+                    </span>
+                    <span ng-hide="cascadeName[cascade.id].approved" class="label label-primary">
+                           <i class="fa fa-fw fa-times"></i>
+                    </span>
+            </td>
+            <td class="text-center">{{cascade.share}}%</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="align-right">
+        <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-success" ng-hide="abTest.approved || abTest.archived" ng-click="approve()">Approve
+        </button>
+        <button class="btn btn-warning" ng-hide="abTest.archived || abTest.active" ng-click="archive(true)">Archive</button>
+        <button class="btn btn-warning" ng-show="abTest.archived" ng-click="archive(false)">Restore</button>
+        <button class="btn btn-primary" ng-hide="abTest.approved || abTest.archived" ng-click="edit()">Edit</button>
+        <button class="btn btn-info" ng-show="abTest.approved && !abTest.archived && !abTest.active" ng-click="activate(true)">Activate</button>
+        <button class="btn btn-info" ng-show="abTest.approved && !abTest.archived && abTest.active" ng-click="activate(false)">Deactivate</button>
+        <button class="btn btn-danger" ng-click="makeDefault(!abTest.dflt)">Default</button>
+    </div>
+</div>
+

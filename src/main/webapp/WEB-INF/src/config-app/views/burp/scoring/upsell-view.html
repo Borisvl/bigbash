@@ -1,0 +1,37 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title">Upselling</h4>
+    </div>
+    <div class="panel-body">
+        <div class="well">scoring_function(reco) = reco_click_probability ^ &alpha; &times;
+            buy_probability ^ &beta; &times; price_contribution ^ &gamma;</div>
+
+
+        <div class="col-lg-2">
+            <label>Parameters: </label>
+        </div>
+
+        <div class="col-lg-2">
+            <strong class="col-lg-4 strong align-right">&alpha;:</strong>
+            <span class="col-lg-8">{{scoringFunctions.upsell.recoClickProbPower}}</span>
+        </div>
+
+        <div class="col-lg-2">
+            <strong class="col-lg-4 strong align-right">&beta;:</strong>
+            <span class="col-lg-8">{{scoringFunctions.upsell.buyProbPower}}</span>
+        </div>
+
+        <div class="col-lg-2">
+            <strong class="col-lg-4 strong align-right">&gamma;:</strong>
+            <span class="col-lg-8">{{scoringFunctions.upsell.priceContributionPower}}</span>
+        </div>
+
+        <div class="col-lg-4">
+            <strong class="col-lg-10 strong align-right">Use test buy probabilities:</strong>
+            <span class="col-lg-2">
+                <i class="fa fa-fw" ng-class="checkmark(scoringFunctions.upsell.useTestBuyProb)"></i>
+            </span>
+        </div>
+
+    </div>
+</div>

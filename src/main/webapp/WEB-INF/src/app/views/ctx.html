@@ -1,0 +1,40 @@
+<form name="bigbashForm" ng-submit="compile()" class="form-horizontal">
+<div class="col-lg-12">
+    <div class="col-lg-7">
+        SQL
+        <textarea style="height:500px; width:100%" ng-model="sql"></textarea>
+    </div>
+
+    <div class="col-lg-5">
+        <table>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="col-sm-4 text-center">Table</th>
+                    <th class="col-sm-5 text-center">Files</th>
+                    <th class="col-sm-2 text-center">Format</th>
+                    <th class="col-sm-1 text-center">Separator</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="t in tables">
+                    <td><input class="form-control" ng-model="t.table"></td>
+                    <td><input class="form-control" ng-model="t.files"></td>
+                    <td><input class="form-control" ng-model="t.format"></td>
+                    <td><input class="form-control" ng-model="t.separator"></td>
+                </tr>
+                </tbody>
+            </table>
+        </table>
+
+    </div>
+</div>
+<div class="col-lg-12">
+    Bash command
+    <textarea style="height:200px; width:100%" ng-model="bashCommand"></textarea>
+</div>
+<div class="text-right">
+    <button class="btn btn-info" ng-click="compile()">Compile</button>
+</div>
+</form>
+

@@ -1,0 +1,91 @@
+<form name="abTestForm" ng-submit="save()" ng-controller="AbTestFormCtrl" class="form-horizontal">
+    <div class="col-lg-8">
+        <div class="page-header"><h3>{{title}}<span ng-show="abTest.id"> ({{abTest.id}})</span></h3></div>
+
+        <div class="form-group">
+            <label class="col-lg-3" for="name">Name:</label>
+
+            <div class="col-lg-9">
+                <input class="form-control" ng-model="abTest.name" type="text" id="name" focus required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-lg-3" for="appDomain">App Domains:</label>
+
+            <div class="col-lg-9">
+                <select id="appDomain"
+                        class="form-control"
+                        chosen
+                        multiple
+                        allow-single-deselect="true"
+                        ng-model="abTest.appDomain"
+                        ng-options="t.ad_id as t | appDomainName for t in appDomains">
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-lg-3" for="recoContext">RecoContext:</label>
+
+            <div class="col-lg-9">
+                <select class="form-control" ng-model="abTest.recoContext"
+                        ng-options="t.name as t.name for t in recoContexts"
+                        id="recoContext"></select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-lg-3" for="recoType">RecoType:</label>
+
+            <div class="col-lg-9">
+                <select class="form-control" ng-model="abTest.recoType"
+                        ng-options="t.name as t.name for t in recoTypes"
+                        id="recoType"></select>
+            </div>
+        </div>
+
+
+        <legend>Cascades</legend>
+
+        <div ng-controller="AbTestDistributionCtrl">
+            <div class="row">
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-default form-control" ng-click="addCascade()"><i
+                            class="fa fa-plus"></i>
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <table class="table table-striped" ng-hide="abTest.distribution.length == 0">
+                <thead>
+                <tr>
+                    <th class="col-sm-5 text-center">Cascade</th>
+                    <th class="col-sm-6 text-center">Share</th>
+                    <th class="col-sm-1"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="dist in abTest.distribution">
+                    <td>
+                        <select class="form-control" ng-model="dist.id"
+                                ng-options="t.id as t | configName for t in cascades | filter:{recoType:abTest.recoType}">
+                        </select>
+                    </td>
+                    <td><input class="form-control" ng-model="dist.share"></td>
+                    <td>
+                        <button type="button" class="btn btn-mini" ng-click="removeCascade($index)">Delete</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-right">
+            <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+            <button class="btn btn-primary" ng-disabled="abTestForm.$invalid">Save</button>
+        </div>
+
+    </div>
+</form>

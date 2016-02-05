@@ -1,0 +1,75 @@
+<div class="col-lg-7">
+
+    <div class="page-header col-lg-12">
+        <div class="col-lg-4"><h3>Cascade Config</h3></div>
+        <div class="col-lg-8 align-right">
+            <h3>
+                <span ng-show="cascade.approved" class="label label-success">Approved</span>
+                <span ng-hide="cascade.approved" class="label label-primary">Not Approved</span>
+                <span ng-show="cascade.archived" class="label label-warning">Archived</span>
+            </h3>
+        </div>
+    </div>
+
+    <p class="col-lg-12">
+        <strong class="col-lg-3 strong align-right">Id:</strong>
+        <span class="col-lg-9">{{cascade.id}}</span>
+
+        <strong class="col-lg-3 strong align-right">Name:</strong>
+        <span class="col-lg-9">{{cascade.name}}</span>
+
+        <strong class="col-lg-3 strong align-right">RecoType:</strong>
+        <span class="col-lg-9">{{cascade.recoType}}</span>
+    </p>
+
+    <legend>Pipelines</legend>
+    <span ng-show="cascade.pipelines.length == 0">No Pipelines</span>
+
+    <table class="table table-striped" ng-hide="cascade.pipelines.length == 0">
+        <thead>
+        <tr>
+            <th class="text-center">Multiplier</th>
+            <th class="text-center">Max</th>
+            <th class="text-center">Burp as Optional</th>
+            <th class="text-center">Apply only if previous SKUs exist</th>
+            <th class="text-center">Burp</th>
+            <th class="text-center">Approved</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="pipeline in cascade.pipelines">
+            <td class="text-center">{{pipeline.multiplier}}</td>
+            <td class="text-center">{{pipeline.max}}</td>
+            <td class="text-center">
+                <i class="fa fa-fw" ng-class="checkmark(pipeline.burpAsOptional)"></i>
+            </td>
+            <td class="text-center">
+                <i class="fa fa-fw" ng-class="checkmark(pipeline.applyOnlyIfPreviousSkusExist)"></i>
+            </td>
+            <td>
+                <a href="#/burp/view/{{pipeline.burpId}}">
+                    {{burpName[pipeline.burpId].name}} ({{pipeline.burpId}})
+                </a>
+            </td>
+            <td class="text-center">
+                    <span ng-show="burpName[pipeline.burpId].approved" class="label label-success">
+                           <i class="fa fa-fw fa-check"></i>
+                    </span>
+                    <span ng-hide="burpName[pipeline.burpId].approved" class="label label-primary">
+                           <i class="fa fa-fw fa-times"></i>
+                    </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="align-right">
+        <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-success" ng-hide="cascade.approved || cascade.archived" ng-click="approve()">Approve
+        </button>
+        <button class="btn btn-warning" ng-hide="cascade.archived" ng-click="archive(true)">Archive</button>
+        <button class="btn btn-warning" ng-show="cascade.archived" ng-click="archive(false)">Restore</button>
+        <button class="btn btn-primary" ng-hide="cascade.approved || cascade.archived" ng-click="edit()">Edit</button>
+    </div>
+</div>
+

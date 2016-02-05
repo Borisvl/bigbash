@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="configApp">
+<head>
+    <title>Big Bash</title>
+    <link href="/ws/admin/resources/css/zalando-bootstrap.css" rel="stylesheet">
+    <link href="/ws/admin/resources/css/config-app.css" rel="stylesheet">
+    <link href="/ws/admin/resources/js/chosen/chosen.css" rel="stylesheet">
+    <link href="/ws/admin/resources/js/tagsinput/bootstrap-tagsinput.css" rel="stylesheet">
+
+    <script src="/ws/admin/resources/js/jquery-2.1.0.min.js"></script>
+    <script src="/ws/admin/resources/js/angular/angular.min.js"></script>
+    <script src="/ws/admin/resources/js/angular/angular-resource.min.js"></script>
+    <script src="/ws/admin/resources/js/angular/angular-route.min.js"></script>
+    <script src="/ws/admin/resources/js/ui-bootstrap-tpls.js"></script>
+
+    <script src="/ws/admin/resources/js/chosen/chosen.jquery.min.js"></script>
+
+    <script src="/ws/admin/resources/js/tagsinput/bootstrap-tagsinput.js"></script>
+    <script src="/ws/admin/resources/js/tagsinput/bootstrap-tagsinput-angular.js"></script>
+
+    <script src="/ws/admin/src/app/scripts/app/app.js"></script>
+    <script src="/ws/admin/src/app/scripts/app/constants.js"></script>
+    <script src="/ws/admin/src/app/scripts/controllers/app-controllers.js"></script>
+    <script src="/ws/admin/src/app/scripts/controllers/ctx-controllers.js"></script>
+    <script src="/ws/admin/src/app/scripts/directives/checkbox-directive.js"></script>
+    <script src="/ws/admin/src/app/scripts/directives/chosen-directive.js"></script>
+    <script src="/ws/admin/src/app/scripts/filters/app-filters.js"></script>
+    <script src="/ws/admin/src/app/scripts/services/ctx-services.js"></script>
+    <script src="/ws/admin/src/app/scripts/services/lov-services.js"></script>
+</head>
+
+<body ng-controller="AppCtrl">
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="collapse navbar-collapse navbar-main-collapse">
+        <div class="col-lg-3">
+            <ul class="nav navbar-nav">
+                <li ng-class="navClass('ctx')"><a ng-href="#ctx/">Big Bash</a></li>
+            </ul>
+        </div>
+        <div class="col-lg-6">
+            <alert style="margin-bottom: 0" ng-show="alert" type="alert.type" close="clearAlert($index)">{{alert.msg}}
+            </alert>
+        </div>
+        <div class="col-lg-3"></div>
+    </div>
+
+</nav>
+
+<div class="wrapper">
+    <div class="container" ng-controller="LovCtrl" style="padding-top: 70px">
+        <div ng-view></div>
+    </div>
+    <div class="push"></div>
+</div>
+<div class="footer">
+    <hr>
+    <p class="text-center">
+        Made by: Recommendations team
+    </p>
+</div>
+</body>
+</html>

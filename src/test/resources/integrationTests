@@ -146,15 +146,15 @@ line2
 line4
 -----------------------
 Create table t(string TEXT, n INT);
-Select group_concat(string) from t group by n;
+Select group_concat(string) from t group by n order by group_concat(string);
 < t
 line1;1
 line2;1
 line1;3
 line4;1
 >
-line1,line2,line4
 line1
+line1,line2,line4
 -----------------------
 Create table t(string TEXT, n INT);
 Select group_concat(string,':') from t;
@@ -545,7 +545,7 @@ line2;3;22;1
 line2;3;25;1
 -----------------------
 Create table t(string TEXT, n INT);
-Select substr(string, 5), count(*), sum(n) from t group by substr(string, 5);
+Select substr(string, 5), count(*), sum(n) from t group by substr(string, 5) order by substr(string, 5);
 < t
 line1;1
 line2;2

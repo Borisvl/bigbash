@@ -8,6 +8,7 @@ import org.aeonbits.owner.ConfigCache;
  */
 public class DelimiterConverter implements BashInput {
 
+    public static final String TAB_CHAR = "$(printf '\\t')";
     private final String delimiter;
     private final String replacement;
 
@@ -23,7 +24,12 @@ public class DelimiterConverter implements BashInput {
                 && (replacement.length() == 1 || replacement.length() == 2 && replacement.charAt(0) =='\\')) {
             return ConfigCache.getOrCreate(ProgramConfig.class).tr() + " $'" + delimiter + "'" + " $'" + replacement + "'";
         }
-        return ConfigCache.getOrCreate(ProgramConfig.class).sed() + 
-                String.format(" 's/%s/%s/g'", delimiter, replacement);
+
+        //This strange replacement is necessary since sed is really old on Mac OS X and does not support \t
+        String localDelimiter = delimiter.replace("\\t", TAB_CHAR);
+        String localReplacement = replacement.replace("\\t", TAB_CHAR);
+
+        return ConfigCache.getOrCreate(ProgramConfig.class).sed() +
+                String.format(" \"s/%s/%s/g\"", localDelimiter, localReplacement);
     }
 }

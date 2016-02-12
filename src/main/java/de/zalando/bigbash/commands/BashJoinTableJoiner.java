@@ -71,7 +71,7 @@ public class BashJoinTableJoiner implements TableJoiner {
         int columnNr1 = table1.getColumnInformation(lowerCaseColumnName1).getColumnNr();
         int columnNr2 = table2.getColumnInformation(lowerCaseColumnName2).getColumnNr();
         p.setOutput(new BashCommand(
-                String.format(programConfig.join() + " %s -e '' -o %s -t $'%s' -1 %d -2 %d", joinOperator,
+                String.format(programConfig.join() + " %s -e '' -o '%s' -t $'%s' -1 %d -2 %d", joinOperator,
                     columnsForJoinCommand, table1.getDelimiter(), columnNr1 + 1, columnNr2 + 1)));
         newTable.setInput(p);
 

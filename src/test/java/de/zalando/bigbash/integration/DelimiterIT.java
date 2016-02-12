@@ -74,7 +74,7 @@ public class DelimiterIT {
         fileMappingPropertiesMap.put("test",
                 new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, "::",
                         false, Optional.<Character>absent()));
-        FileMappingProperties.outputDelimiter = ";";
+        FileMappingProperties.outputDelimiter = "\\t";
         BashCompiler compiler = new BashCompiler();
         String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true);
         BashStarter starter = new BashStarter(".", bashScript);
@@ -82,7 +82,7 @@ public class DelimiterIT {
         System.out.println(sql);
         System.out.println(bashScript);
         System.out.flush();
-        assertEquals("Entry:1;Entry 2;3434;;Entry 3;:\n", scriptOutput);
+        assertEquals("Entry:1\tEntry 2\t3434\t\tEntry 3\t:\n", scriptOutput);
     }
 
 }

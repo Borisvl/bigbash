@@ -39,93 +39,77 @@ operator, e.g. in _"SELECT \* FROM ..."_, sometimes shows unexpected results.
 * Sub-selects, UNION, IN
 * CASE
 * LIKE (use REGEXP instead)
-* DISTINCT (you can use GROUP BY in some situations instead, though this will not work in some aggregation functions)
+* DISTINCT (you can use GROUP BY, though this will not work in some aggregation functions)
 * Aliases, AS operator
 * Joins that are not equi-joins
 * Implicit joins (use explicit joins instead)
 * Queries without a FROM part
 
 ### Special Syntax
+BigBash only supports inner and left hash joins, as well as the _HASH JOIN_ operator. _HASH JOIN_ acts like a normal join, but is more performant in situations where the right side of the join fits completely into memory. For right or outer joins, use the normal join operation instead. 
 
-BigBash only supports inner and left hash joins, as well as the _HASH JOIN_ operator. _HASH JOIN_ acts like a normal join, but is more performant in situations where the right side of the join fits completely into memory. For right or outer joins, use the normal join operation instead. If the join-key of the right table is marked "unique" in 
-the corresponding _CREATE TABLE_ statement, the hash join operation is even faster.
+If the join-key of the right table is marked "unique" in the corresponding _CREATE TABLE_ statement, the hash join operation is even faster.
 
-### The MAP command
-
+### The MAP Command
 MAP **table_name** TO **'filename[s]'|'command'** [DELIMITER **'delimiter'**] [QUOTE **'quote_char'**] [TYPE **'type'**] [REMOVEHEADER]
 
 #### Parameters
-
 * **table_name**: The name of an existing table
-* **filename[s]**: A globbing expression that denotes one or more files. Examples: _*.gz_, _access.log.2015-03-0[123].gz_. 
-You can also use bash extended globbing patterns, if enabled via _shopt -s extglob_.
-* **command** (If TYPE is set to 'RAW): A bash command that outputs the stream to be mapped to the table. Examples: 
-_bzip2 -dc *.bz_
-* DELIMITER: Specifies the character that separates the columns. The default is a tabulator.
-* QUOTE: Specifies the character that is used to quote column expressions. Default is no quotation. Please note that
-big-bash removes all quotations and it is necessary to choose an output delimiter that is not used in the mapped data.
-* TYPE: Allows to specify the input type. **'type'** must be one of 'FILE' (default), 'GZ' or 'RAW'.
-* REMOVEHEADER: Use this if the files contain a header, they will be ignored.
+* **filename[s]**: A globbing expression that denotes one or more files. Examples: _*.gz_, and _access.log.2015-03-0[123].gz_. You can also use Bash-extended globbing patterns, if enabled via _shopt -s extglob_.
+* **command** (If TYPE is set to `RAW`): A Bash command that outputs to the table the stream you wish to map. Example: 
+_bzip2 -dc *.bz_.
+* **DELIMITER**: Specifies the character that separates the columns. The default is a tabulator.
+* **QUOTE**: Specifies the character used to quote column expressions. The default is no-quotation. BigBash removes all quotations, so you have to choose an output delimiter that isn't used in the mapped data.
+* **TYPE**: Allows you to specify the input type. **'type'** must be one of these: 'FILE' (default), 'GZ' or 'RAW'.
+* **REMOVEHEADER**: Use this if the files contain a header; otherwise they will be ignored.
 
 #### Caveats 
-
-* Escaping of delimiters in the input files is not supported at the moment
-
+* BigBash currently doesn't support escaping of delimiters in input files.
 
 How It Works
 -----------------
-### A First Example
-
-Let's do a quick example how to use big-bash to query the Movielens dataset. This datasets contains ratings of movies
-from various users and is made available for free by GroupLens. 
-First, download the dataset and extract it via 
+### Example #1: Querying a Database
+Let's have BigBash query the [Movielens](https://movielens.org/) dataset, which contains user-generated movie ratings. Download the dataset and extract it via:
 
     wget "http://files.grouplens.org/datasets/movielens/ml-1m.zip"
     unzip ml-1m.zip
     
 You should now have a directory ml-1m that contains three files:
-
 * movies.dat: Title and genre information
-* ratings.dat: The ratings from 1-5 with a timestamp
-* users.dat: Additional user informations
+* ratings.dat: The ratings (from one to five) and timestamps
+* users.dat: Additional user information
 
-Now, open an editor, type in
+Open an editor and type:
 
     CREATE TABLE movies (id INT UNIQUE, title TEXT, genres TEXT);
     MAP movies TO 'movies.dat' DELIMITER '::';
     SELECT title FROM movies ORDER BY title LIMIT 10;
 
-and save it under ml_test1.sql. Type in your terminal
+Then save it under _ml_test1.sql_. In your terminal, type:
 
     ./bigbash.sh -f ml_test1.sql
     
-and the program outputs a bash one-liner like this: 
+The program should output a Bash one-liner like this: 
 
     (trap "kill 0" SIGINT; export LC_ALL=C; cat movies.dat|sed 's/::/\t/g'|cut -d $'\t' -f2|sort -S2G --parallel=4 -t$'\t'  -k 1,1|head -n10|awk -F '\t' '{print $1}')
 
-Executing this one-liner in the movielens directory should now produce the
-first ten movies (alphabetical) of the dataset. Let us take a look at the created sql file. The first line uses a
-typical _CREATE TABLE_ statement to define the table _movies_ with three columns. The next line
+Executing this one-liner in the Movielens directory should produce an alphabetical list of the first 10 movies in the dataset. 
+
+Let's take a look at the created SQL file. The first line uses a typical _CREATE TABLE_ statement to define the table _movies_ with three columns. The next line:
 
     MAP movies TO 'movies.dat' DELIMITER '::';
     
-states that the table should be mapped to the file "movies.dat" and the delimiter used in this file are two colons. 
-Since we are using a shell script to execute the query, general globbing pattern can be used instead of a simple 
+states that the table should be mapped to the file _movies.dat_. The delimiter used in this file are two colons. Because we are using a shell script to execute the query, we can use a general globbing pattern instead of a simple 
 filename.
-Big-bash also supports gziped files as well as quotations. Look ***TODO*** for more details.
 
-The third line is a standard sql _SELECT_ statement to output the movie names, which is translated to the bash 
-one-liner. If you are familiar with bash scriptings and the unix tools, then it should be no problem for you to 
-understand the created bash code.
+BigBash also supports gziped files as well as quotations. Look ***TODO*** for more details.
 
-### A second example
+The third line is a standard SQL _SELECT_ statement. It outputs the movie names, which are then translated to the Bash 
+one-liner. If you are familiar with Bash scriptings and UNIX tools, understanding this Bash code shouldn't be a problem. 
 
-The previous example was rather basic and does not show the full power of the tool. Let us create a more complicated
-statement on the dataset that uses also the ratings: The Top-10 movies according to the avg. ratings of all male 
-users older than thirty. 
-Similar to the previous example, we first create the tables and the mappings and then the _SELECT_ 
-statement.
-Open an editor and type
+### Example Two: Joining a Large Table with a Small One 
+
+The above example is simple and doesn't show BigBash's full power. So let's create a more complicated statement on the dataset, using the top ten movies according to the average ratings submitted by all male users over 30. As in the previous example, we first create the tables, mappings, and _SELECT_ statement. Open an editor and type:
 
     CREATE TABLE movies (id INT UNIQUE, title TEXT, genres TEXT);
     CREATE TABLE ratings (user_id int, movie_id int, rating int, ratingtime LONG);
@@ -144,7 +128,7 @@ Open an editor and type
     ORDER BY sum(rating)/count(*) DESC
     LIMIT 10;
     
-and save it as ml_test2.sql. Executing it leads to a rather long one-liner similar to this one
+Save it as _ml_test2.sql_. Executing it leads to a rather long one-liner similar to this:
     
     (trap "kill 0" SIGINT; export LC_ALL=C; 
     awk 'BEGIN{FS=OFS="\t"}NR==FNR{map[$1]=$0; next}{c=map[$1]; if (c) print $0,c; }' 
@@ -156,7 +140,7 @@ and save it as ml_test2.sql. Executing it leads to a rather long one-liner simil
     |awk -F '\t' '($10 > 5) {print}'|awk 'BEGIN{FS=OFS="\t"}{print $0,$9 / $10}'
     |sort -S2G --parallel=4 -t$'\t'  -k 11,11rn|head -n10|awk -F '\t' '{print $5"\t"$9 / $10}')
 
-Since it is cumbersome to work with such a long script, we can also save the output directly into a file via
+It's cumbersome to work with such a long script, so you can save the output directly into a file via:
 
     echo "#!/usr/bin/env bash" > ml_test2.sh
     ./bigbash.sh -f ml_test2.sql >> ml_test2.sh
@@ -175,7 +159,7 @@ Executing this in our directory leads to the following output (piped through `co
     Schindler's List (1993)                                                      4.5022
     Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963)  4.50093
 
-Here we have used _HASH JOIN_ which is special for Big-bash. It describes a normal inner join but uses a hash map
+Here we have used _HASH JOIN_, which is special for BigBash. It describes a normal inner join, but uses a hash map
 internally to store the values of the right-hand side. It is faster in cases you are joining a large table 
 with a small one, like in this example. Note, that we also add a _UNIQUE_ constraint to the id column in the movie 
 table. This also increases the performance of the hash join.

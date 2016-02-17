@@ -1,25 +1,82 @@
-Big-Bash
+BigBash
 ==========
 
-Big-Bash consists of a SQL-parser that converts _select_ statements to bash one liners that can be executed directly 
-on csv files. It does not use any database and the generated script should therefore run on almost 
-any \*nix device.
+BigBash is a SQL parser that converts _select_ statements to Bash one-liners that are executable directly 
+on csv, log files, and other flat files. BigBash doesn't use a database, so the generated script should run on almost any \*nix device.  
 
-Getting started
+You might find BigBash useful if:
+- you don't have access to a database
+- you're a sysop who wants to do simple aggregations without installing a database on your machine
+- you're a Big Data skeptic who's interested in a tool that crunches a lot of data using only Bash scripts
+
+Important Disclaimer
+-----------------
+BigBash is currently not meant for use in production or in a commercial setting. It can produce unexpected or incomplete results. The project originated during [Zalando Hack Week](https://tech.zalando.com/blog/?tags=Hack%20Week) and should be treated as an experiment. 
+
+That said, if you'd like to contribute to enhancing the project's useability please see the guidelines and TODO below. 
+
+Getting Started
 -----------------
 
-### Installing
+### Installation Requirements
+- Java JDK >= 1.7
+- Maven >= 3.0
 
-Checkout or download the source code. Please ensure that you have a Java JDK >= 1.7 and Maven >= 3.0 installed.
-You can use
+BigBash is free of dependencies, so after installing the above you should be able to run it instantly on any operating system.
 
-    ./bigbash.sh
-    
-to launch the converter. If it has not yet been build, it will automatically start the build process.
+### Running
+Download the source code. To launch the converter, use `./bigbash.sh`. This should automatically start the build process.
 
-### A first example
+### Configuration
+You can change which *nix programs BigBash uses by editing the `bigbash.conf` file. BigBash first looks in the
+current directory for the config files. If it finds none, it chooses the paths `~/.config/bigbash.conf` and `/etc/bigbash.conf`.
 
-Let us do a quick example how to use big-bash to query the Movielens dataset. This datasets contains ratings of movies
+### Supported SQL
+BigBash supports a subset of SQL92 syntax for _select_ and _create table_ statements. Please note that the _\*_
+operator, e.g. in _"SELECT \* FROM ..."_, sometimes shows unexpected results.
+
+### Not Supported
+* Sub-selects, UNION, IN
+* CASE
+* LIKE (use REGEXP instead)
+* DISTINCT (you can use GROUP BY in some situations instead, though this will not work in some aggregation functions)
+* Aliases, AS operator
+* Joins that are not equi-joins
+* Implicit joins (use explicit joins instead)
+* Queries without a FROM part
+
+### Special Syntax
+
+BigBash only supports inner and left hash joins, as well as the _HASH JOIN_ operator. _HASH JOIN_ acts like a normal join, but is more performant in situations where the right side of the join fits completely into memory. For right or outer joins, use the normal join operation instead. If the join-key of the right table is marked "unique" in 
+the corresponding _CREATE TABLE_ statement, the hash join operation is even faster.
+
+### The MAP command
+
+MAP **table_name** TO **'filename[s]'|'command'** [DELIMITER **'delimiter'**] [QUOTE **'quote_char'**] [TYPE **'type'**] [REMOVEHEADER]
+
+#### Parameters
+
+* **table_name**: The name of an existing table
+* **filename[s]**: A globbing expression that denotes one or more files. Examples: _*.gz_, _access.log.2015-03-0[123].gz_. 
+You can also use bash extended globbing patterns, if enabled via _shopt -s extglob_.
+* **command** (If TYPE is set to 'RAW): A bash command that outputs the stream to be mapped to the table. Examples: 
+_bzip2 -dc *.bz_
+* DELIMITER: Specifies the character that separates the columns. The default is a tabulator.
+* QUOTE: Specifies the character that is used to quote column expressions. Default is no quotation. Please note that
+big-bash removes all quotations and it is necessary to choose an output delimiter that is not used in the mapped data.
+* TYPE: Allows to specify the input type. **'type'** must be one of 'FILE' (default), 'GZ' or 'RAW'.
+* REMOVEHEADER: Use this if the files contain a header, they will be ignored.
+
+#### Caveats 
+
+* Escaping of delimiters in the input files is not supported at the moment
+
+
+How It Works
+-----------------
+### A First Example
+
+Let's do a quick example how to use big-bash to query the Movielens dataset. This datasets contains ratings of movies
 from various users and is made available for free by GroupLens. 
 First, download the dataset and extract it via 
 
@@ -138,57 +195,6 @@ Usage
                          false)
      -d VAL            : Output delimiter (default: \t)
      -f (--file) FILE  : SQL file that should be processed
-
-### Default options
-
-You can change what *nix programs BigBash shall use by editing the file `bigbash.conf`. BigBash first looks in the
-current directory for the config files. If it does not exists the next paths are 
-`~/.config/bigbash.conf` and `/etc/bigbash.conf`.
-
-Supported SQL
----------------
-
-Big-Bash supports a sub set of SQL92 syntax for _select_ and _create table_ statements. Please note that the _\*_
-operator, e.g. in _"SELECT \* FROM ..."_, can sometimes show unexpected results.
-
-### Not supported
-
-* Sub-selects, UNION, IN
-* CASE
-* LIKE (use REGEXP instead)
-* DISTINCT (besides in some aggregation functions, you can use GROUP BY in some situations instead)
-* Aliases, AS operator
-* Joins that are no equi-joins
-* Implicit joins (use explicit joins instead)
-* Queries without a FROM part
-
-### Special syntax
-
-Big-Bash supports a special _HASH JOIN_ operator which acts like a normal join but can be more performant in situations
-where the right side of the join fits completely into memory. Note that only inner and left hash joins are supported. 
-For right or outer joins use the normal join operation instead. If the join-key of the right table is marked unique in 
-the corresponding _CREATE TABLE_ statement, the hash join operation is even faster.
-
-### The MAP command
-
-MAP **table_name** TO **'filename[s]'|'command'** [DELIMITER **'delimiter'**] [QUOTE **'quote_char'**] [TYPE **'type'**] [REMOVEHEADER]
-
-#### Parameters
-
-* **table_name**: The name of an existing table
-* **filename[s]**: A globbing expression that denotes one or more files. Examples: _*.gz_, _access.log.2015-03-0[123].gz_. 
-You can also use bash extended globbing patterns, if enabled via _shopt -s extglob_.
-* **command** (If TYPE is set to 'RAW): A bash command that outputs the stream to be mapped to the table. Examples: 
-_bzip2 -dc *.bz_
-* DELIMITER: Specifies the character that separates the columns. The default is a tabulator.
-* QUOTE: Specifies the character that is used to quote column expressions. Default is no quotation. Please note that
-big-bash removes all quotations and it is necessary to choose an output delimiter that is not used in the mapped data.
-* TYPE: Allows to specify the input type. **'type'** must be one of 'FILE' (default), 'GZ' or 'RAW'.
-* REMOVEHEADER: Use this if the files contain a header, they will be ignored.
-
-#### Caveats 
-
-* Escaping of delimiters in the input files is not supported at the moment
 
 Supported functions
 -----------------------

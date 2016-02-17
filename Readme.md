@@ -46,7 +46,9 @@ operator, e.g. in _"SELECT \* FROM ..."_, sometimes shows unexpected results.
 * Queries without a FROM part
 
 ### Special Syntax
-BigBash only supports inner and left hash joins, as well as the _HASH JOIN_ operator. _HASH JOIN_ acts like a normal join, but is more performant in situations where the right side of the join fits completely into memory. For right or outer joins, use the normal join operation instead. 
+BigBash only supports inner and left hash joins, as well as the _HASH JOIN_ operator. _HASH JOIN_ acts like a normal join, but uses a hash map internally to store the values of the right-hand side. It's faster/more performant in situations where the right side of the join fits completely into memory. BigBash's support of _HASH JOIN_ is one of its special qualities. 
+
+For right or outer joins, use the normal join operation instead. 
 
 If the join-key of the right table is marked "unique" in the corresponding _CREATE TABLE_ statement, the hash join operation is even faster.
 
@@ -65,6 +67,15 @@ _bzip2 -dc *.bz_.
 
 #### Caveats 
 * BigBash currently doesn't support escaping of delimiters in input files.
+
+Developers Section
+-----------------
+### Build Instructions
+**[to be added]**
+
+### Testing
+- Integration testing: **[to be added]**
+**[more to be added]**
 
 How It Works
 -----------------
@@ -107,9 +118,10 @@ BigBash also supports gziped files as well as quotations. Look ***TODO*** for mo
 The third line is a standard SQL _SELECT_ statement. It outputs the movie names, which are then translated to the Bash 
 one-liner. If you are familiar with Bash scriptings and UNIX tools, understanding this Bash code shouldn't be a problem. 
 
-### Example Two: Joining a Large Table with a Small One 
+### Example Two: Joining a Large Table to a Small One 
+The above example doesn't show BigBash's full power—generated largely by its use of the _HASH JOIN_ operator. Let's create a more complicated statement on the dataset, using the top ten movies according to the average ratings submitted by all male users over 30. 
 
-The above example is simple and doesn't show BigBash's full power. So let's create a more complicated statement on the dataset, using the top ten movies according to the average ratings submitted by all male users over 30. As in the previous example, we first create the tables, mappings, and _SELECT_ statement. Open an editor and type:
+As in the previous example, we first create the tables, mappings, and _SELECT_ statement. Open an editor and type:
 
     CREATE TABLE movies (id INT UNIQUE, title TEXT, genres TEXT);
     CREATE TABLE ratings (user_id int, movie_id int, rating int, ratingtime LONG);
@@ -159,12 +171,7 @@ Executing this in our directory leads to the following output (piped through `co
     Schindler's List (1993)                                                      4.5022
     Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963)  4.50093
 
-Here we have used _HASH JOIN_, which is special for BigBash. It describes a normal inner join, but uses a hash map
-internally to store the values of the right-hand side. It is faster in cases you are joining a large table 
-with a small one, like in this example. Note, that we also add a _UNIQUE_ constraint to the id column in the movie 
-table. This also increases the performance of the hash join.
-We could replace it via a normal join and would get the same output, but it would take 
-more time to create the output.
+Here we see the _HASH JOIN_ operator at work. We add a _UNIQUE_ constraint to the id column in the movie table; this, like _HASH JOIN_, increases the performance of the hash join. Replacing it via a normal join would produce the same output, but would take longer.
 
 Usage
 ---------------
@@ -175,15 +182,14 @@ Usage
      --help            : Print this message (default: false)
      --noAnsiC         : Use this if you have problems with the default Ansi-C
                          decoding (default: false)
-     --sortAggregation : Uses sort instead of hash based aggregation (default:
+     --sortAggregation : Uses sort instead of hash-based aggregation (default:
                          false)
      -d VAL            : Output delimiter (default: \t)
      -f (--file) FILE  : SQL file that should be processed
 
-Supported functions
+Supported Functions
 -----------------------
-
-### Aggregation functions
+### Aggregation Functions
 
 * Count (with *DISTINCT* support)
 * Sum
@@ -193,48 +199,33 @@ Supported functions
 
 Note that when using the *DISTINCT* operator, it is assumed that all distinct values fit into memory.
 
-### Logical operators
+### Logical Operators
 
 * <,>,>=,<=,<>,!=,=,==
-* AND,OR
+* AND, OR
 
-### Arithmetic operators
+### Arithmetic Operators
 
 * +,-,*,/,% (modulo)
 
 ### Functions
 
-All awk functions are supported. For more details please refer the 
-[awk documentation](http://www.math.utah.edu/docs/info/gawk_13.html).
+BigBash supports all awk functions. For more details, please refer to the [awk documentation](http://www.math.utah.edu/docs/info/gawk_13.html).
 
 FAQ
 ------
 
-Q: I cannot do anything when I have JSON files, right?
+Q: I can't use BigBash with JSON files, can I?
+A: BigBash does not support JSON out of the box, but in some cases you can convert JSON to csv using sed or jq. An example: `cat persons.json | jq -r '[.name,.address.street,.address.city,.gender]|@csv'`, which could be used together with the RAW mapping type.
 
-A: Big-Bash does not support JSON out of the box, but in some cases you can convert it to csv using sed or jq. 
-Example: `cat persons.json | jq -r '[.name,.address.street,.address.city,.gender]|@csv'`
-This can then be used together with the RAW mapping type.
-
-Q: Can I directly invoke Big-Bash with files on S3?
-
-A: You can do this using the aws tools. One way is to use a one-liner like this as input command
+Q: Can I directly invoke BigBash with files on S3?
+A: Yes, using the AWS tools. One way is to use a one-liner like this as an input command:
 
     AWS_BUCKET="s3://<bucketname>"; AWS_PATH_PREFIX="<path to look for files>"; AWS_PATTERN="<the regexp file pattern to match>"; aws s3 ls "$AWS_BUCKET/$AWS_PATH_PREFIX" --recursive | sed -n -E 's/.* +[0-9]+ +(.*)/\1/p' | grep "$AWS_PATTERN" | xargs -i aws s3 cp "$AWS_BUCKET/{}" - 
 
-License
+TODO
 ----------
-
-    Copyright 2015 Zalando SE
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+To contribute to BigBash, submit a pull request using the usual method. Here are some desired enhancements you could work on:
+- enable BigBash to support the `PARALLEL` command and parallel execution
+- provide aliases support
+- ensure correct formatting of the data/error-checking

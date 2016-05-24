@@ -15,7 +15,7 @@ BigBash is currently not meant for use in production or in a commercial setting.
 It can produce unexpected or incomplete results. 
 The project originated during [Zalando Hack Week](https://tech.zalando.com/blog/?tags=Hack%20Week) and should be treated as an experiment. 
 
-That said, if you'd like to contribute to enhancing the project's useability please see the [developers section](#Developers-section). 
+That said, if you'd like to contribute to enhancing the project's useability please see the [developers section](#developers-section). 
 
 Getting Started
 -----------------
@@ -67,7 +67,7 @@ Let's take a look at the SQL file. The first line uses a typical _CREATE TABLE_ 
 states that the table should be mapped to the file _movies.dat_. The column delimiter used in this file are two colons. Because we are using a shell script to execute the query, we can also use a general globbing pattern instead of a simple 
 filename.
 
-BigBash also supports gziped files as well as quotations. Check the [MAP command](#The-MAP-Command) for more details.
+BigBash also supports gziped files as well as quotations. Check the [MAP command](#map-command) for more details.
 
 The third line is a standard SQL _SELECT_ statement. It outputs the movie names, which are then translated to the Bash 
 one-liner. If you are familiar with Bash scriptings and UNIX tools, understanding this Bash code shouldn't be a problem. 
@@ -167,7 +167,7 @@ Note that only inner and left hash joins are supported, for right or outer joins
 
 If the join-key of the right table is marked "unique" in the corresponding _CREATE TABLE_ statement, the hash join operation is even faster.
 
-### The MAP Command
+### <a name="map-command"></a>The MAP Command
 MAP **table_name** TO **'filename[s]'|'command'** [DELIMITER **'delimiter'**] [QUOTE **'quote_char'**] [TYPE **'type'**] [REMOVEHEADER]
 
 #### Parameters
@@ -227,7 +227,7 @@ A: Yes, using the AWS tools. One way is to use a one-liner like this as an input
 
     AWS_BUCKET="s3://<bucketname>"; AWS_PATH_PREFIX="<path to look for files>"; AWS_PATTERN="<the regexp file pattern to match>"; aws s3 ls "$AWS_BUCKET/$AWS_PATH_PREFIX" --recursive | sed -n -E 's/.* +[0-9]+ +(.*)/\1/p' | grep "$AWS_PATTERN" | xargs -i aws s3 cp "$AWS_BUCKET/{}" - 
 
-Developers Section
+<a name="developers-section"></a>Developers Section
 -----------------
 ### Testing
 There is an extensive list of integration tests that you can find in the file 

@@ -2,12 +2,14 @@ BigBash
 ==========
 
 BigBash is a SQL parser that converts _select_ statements to Bash one-liners that are executable directly 
-on csv, log files, and other flat files. BigBash doesn't use a database, so the generated script should run on almost any \*nix device.  
+on csv, log files, and other flat files. BigBash doesn't use a database, 
+so the generated script should run on almost any \*nix device. It is optimized for speed and should outperform
+simple databases when the data is large.
 
 You might find BigBash useful if:
 - you don't have access to a database
 - you're a sysop who wants to do simple aggregations without installing a database on your machine
-- you're a Big Data skeptic who likes to crunch gigabytes of data using shell scripts
+- you're feeling uncomfortable to spin up a Big Data stack just to crunch a couple gigabytes of data
 
 Important Disclaimer
 -----------------
@@ -67,7 +69,7 @@ Let's take a look at the SQL file. The first line uses a typical _CREATE TABLE_ 
 states that the table should be mapped to the file _movies.dat_. The column delimiter used in this file are two colons. Because we are using a shell script to execute the query, we can also use a general globbing pattern instead of a simple 
 filename.
 
-BigBash also supports gziped files as well as quotations. Check the [MAP command](#map-command) for more details.
+BigBash also supports gzipped files as well as quotations. Check the [MAP command](#map-command) for more details.
 
 The third line is a standard SQL _SELECT_ statement. It outputs the movie names, which are then translated to the Bash 
 one-liner. If you are familiar with Bash scriptings and UNIX tools, understanding this Bash code shouldn't be a problem. 
@@ -163,7 +165,7 @@ operator, e.g. in _"SELECT \* FROM ..."_, sometimes shows unexpected results.
 In addition to a standard _JOIN_ operator BigBash also supports a special _HASH JOIN_ operator.
 _HASH JOIN_ acts like a normal join, but uses a hash map internally to store the values of the right-hand side. 
 It's faster/more performant in situations where the right side of the join fits completely into memory. 
-Note that only inner and left hash joins are supported, for right or outer joins use the normal join operation instead. 
+Note that only inner and left hash joins are supported; for right or outer joins, use the normal join operation instead. 
 
 If the join-key of the right table is marked "unique" in the corresponding _CREATE TABLE_ statement, the hash join operation is even faster.
 
@@ -211,8 +213,7 @@ For more details, please refer to the [awk documentation](http://www.math.utah.e
 FAQ
 ---
 
-Q: Bigbash is slow on my machine, what can I do to make it faster?
-
+Q: Bigbash is slow on my machine. What can I do to make it faster?
 A: Using the `--parallel=<nr of cores>` switch for the sort makes a big difference in most cases (change it in your bigbash.conf).
 The performance of the queries depends on the tools used. Make sure you have updated sort, awk, sed and join to 
 the latest versions. In particular on Mac OS, the default installed core utils are really outdated 
@@ -220,7 +221,11 @@ the latest versions. In particular on Mac OS, the default installed core utils a
 for details how to update). Also try different awk implementations, e.g., mawk or gawk.
 
 Q: I can't use BigBash with JSON files, can I?
-A: BigBash does not support JSON out of the box, but in some cases you can convert JSON to csv using sed or jq. An example: `cat persons.json | jq -r '[.name,.address.street,.address.city,.gender]|@csv'`, which could be used together with the RAW mapping type.
+A: BigBash does not support JSON out of the box, but in some cases you can convert JSON to csv using sed or jq. An example: 
+
+    cat persons.json | jq -r '[.name,.address.street,.address.city,.gender]|@csv'
+
+which could be used together with the [RAW mapping](#map-command) type.
 
 Q: Can I directly invoke BigBash with files on S3?
 A: Yes, using the AWS tools. One way is to use a one-liner like this as an input command:
@@ -231,19 +236,19 @@ A: Yes, using the AWS tools. One way is to use a one-liner like this as an input
 -----------------
 ### Testing
 There is an extensive list of integration tests that you can find in the file 
-`src/test/resources/integrationTests`. To run the tests on your local machine execute
+`src/test/resources/integrationTests`. To run the tests on your local machine, execute
     
     mvn verify -Pintegration-tests
 
-If these test fail it is very likely that BigBash will not work correctly on your machine,
+If these test fail, it is very likely that BigBash will not work correctly on your machine,
 most likely due to incompatibility issues with your \#nix tools.
 
 ### Contributing
-We welcome code contributions, please just clone the repository and create pull requests.
+We welcome code contributions. Please just clone the repository and create pull requests.
 
 TODO
 ----------
 To contribute to BigBash, submit a pull request using the usual method. Here are some desired enhancements you could work on:
-- enable BigBash to support the `PARALLEL` command and parallel execution
+- enable BigBash to use [GNU parallel](http://www.gnu.org/software/parallel/) for parallel execution
 - provide aliases support
 - ensure correct formatting of the data/error-checking

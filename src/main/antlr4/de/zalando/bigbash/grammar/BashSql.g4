@@ -94,6 +94,7 @@ expr
  | arg1=expr op=K_OR arg2=expr                                          #boolean_expression
  | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'      #function
  | '(' expr ')'                                                         #subexpression
+ | K_CASE arg1=expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END     #case_expression
  ;
 
 table_constraint

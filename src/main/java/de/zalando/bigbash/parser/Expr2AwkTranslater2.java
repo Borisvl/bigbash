@@ -1,9 +1,5 @@
 package de.zalando.bigbash.parser;
 
-import java.util.Map;
-
-import org.antlr.v4.runtime.Token;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -11,9 +7,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.escape.CharEscaperBuilder;
 import com.google.common.escape.Escaper;
-
 import de.zalando.bigbash.entities.BashSqlTable;
 import de.zalando.bigbash.grammar.BashSqlParser;
+import org.antlr.v4.runtime.Token;
+
+import java.util.Map;
 
 /**
  * Created by bvonloesch on 6/28/14.
@@ -77,6 +75,9 @@ public class Expr2AwkTranslater2 implements ExprTranslater {
             } else {
                 return sExpr.literal_value().getText();
             }
+        } else if (expr instanceof BashSqlParser.Case_expressionContext) {
+            CaseWhen2AwkTranslater caseWhen2AwkTranslater = new CaseWhen2AwkTranslater();
+            return caseWhen2AwkTranslater.translateSingleExprStmt((BashSqlParser.Case_expressionContext) expr, this);
         }
 
         return null;

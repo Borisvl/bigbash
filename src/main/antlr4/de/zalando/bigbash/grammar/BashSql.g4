@@ -86,6 +86,7 @@ type_name
 expr
  : literal_value                                                        #somethine
  | (table=table_name '.' )? column=column_name                          #column_name_def
+ | op=( '-' | '+' ) arg1=expr                                           #unary_expression
  | arg1=expr op=( '*' | '/' | '%' ) arg2=expr                           #boolean_expression
  | arg1=expr op=( '+' | '-' ) arg2=expr                                 #boolean_expression
  | arg1=expr op=( '<' | '<=' | '>' | '>=' ) arg2=expr                   #boolean_expression

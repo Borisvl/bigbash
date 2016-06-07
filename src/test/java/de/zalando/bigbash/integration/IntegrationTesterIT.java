@@ -3,6 +3,8 @@ package de.zalando.bigbash.integration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import de.zalando.bigbash.commandline.BashCompiler;
 import de.zalando.bigbash.entities.CompressionType;
 import de.zalando.bigbash.entities.FileMappingProperties;
@@ -16,10 +18,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -107,6 +108,15 @@ public class IntegrationTesterIT {
                         throw new RuntimeException("Expect > after table definition");
                     }
 
+                    //Check for hash
+                    if (line.trim().length() > 1 && line.trim().length() == 33) {
+                        String nextLine = reader.readLine();
+                        if (!nextLine.startsWith("-")) {
+                            throw new RuntimeException("Expect end of test (---) after hash.");
+                        }
+                        return ImmutableList.of(statement.toString(), input, line.trim()).toArray();
+                    }
+
                     StringBuilder output = new StringBuilder();
                     while ((line = reader.readLine()) != null) {
                         if (line.startsWith("-")) {
@@ -155,7 +165,7 @@ public class IntegrationTesterIT {
         System.out.println(sql);
         System.out.println(bashScript);
         System.out.flush();
-        assertEquals(output, scriptOutput);
+        checkOutput(output, scriptOutput);
     }
 
     @Test
@@ -176,7 +186,25 @@ public class IntegrationTesterIT {
         System.out.println(sql);
         System.out.println(bashScript);
         System.out.flush();
-        assertEquals(output, scriptOutput);
+        checkOutput(output, scriptOutput);
+    }
+
+    public void checkOutput(String output, String scriptOutput) throws NoSuchAlgorithmException {
+        //Magic constant
+        if (output.startsWith(">")) {
+            //It is a hash
+            String md5hash = output.substring(1);
+            Hasher md5 = Hashing.md5().newHasher();
+            StringTokenizer stk = new StringTokenizer(scriptOutput, ";\n");
+            StringBuilder builder = new StringBuilder();
+            while (stk.hasMoreTokens()) {
+                builder.append(stk.nextToken()).append('\n');
+            }
+            md5.putString(builder.toString(), Charset.defaultCharset());
+            assertEquals(md5hash, md5.hash().toString());
+        } else {
+            assertEquals(output, scriptOutput);
+        }
     }
 
 }

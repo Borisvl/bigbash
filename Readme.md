@@ -153,7 +153,6 @@ operator, e.g. in _"SELECT \* FROM ..."_, sometimes shows unexpected results.
 
 ### Not Supported
 * Sub-selects, UNION, IN
-* CASE
 * LIKE (use REGEXP instead)
 * DISTINCT (you can use GROUP BY, though this will not work in some aggregation functions)
 * Aliases, AS operator

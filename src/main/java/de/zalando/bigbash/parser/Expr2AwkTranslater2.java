@@ -1,9 +1,5 @@
 package de.zalando.bigbash.parser;
 
-import java.util.Map;
-
-import org.antlr.v4.runtime.Token;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -11,9 +7,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.escape.CharEscaperBuilder;
 import com.google.common.escape.Escaper;
-
 import de.zalando.bigbash.entities.BashSqlTable;
 import de.zalando.bigbash.grammar.BashSqlParser;
+import org.antlr.v4.runtime.Token;
+
+import java.util.Map;
 
 /**
  * Created by bvonloesch on 6/28/14.
@@ -23,10 +21,10 @@ public class Expr2AwkTranslater2 implements ExprTranslater {
     private final BashSqlTable table;
 
     private final Map<String, String> map = ImmutableMap.<String, String>builder().put("AND", "&&").put("OR", "||")
-                                                .put("<>", "!=").put("=", "==").build();
+            .put("<>", "!=").put("=", "==").build();
     private final Escaper escaper = new CharEscaperBuilder().addEscape('"', "\\\"").addEscape('\\', "\\\\").addEscape('\n', "\\n")
-                                              .addEscape('\r', "\\r").addEscape('\t', "\\t").addEscape('\b', "\\b")
-                                              .toEscaper();
+            .addEscape('\r', "\\r").addEscape('\t', "\\t").addEscape('\b', "\\b")
+            .toEscaper();
 
     public Expr2AwkTranslater2(final BashSqlTable table) {
         this.table = table;
@@ -49,6 +47,10 @@ public class Expr2AwkTranslater2 implements ExprTranslater {
                     + translateSingleExprStmt(bexpr.arg2);
         } else if (expr instanceof BashSqlParser.SubexpressionContext) {
             return "(" + translateSingleExprStmt((BashSqlParser.ExprContext) expr.getChild(1)) + ")";
+        } else if (expr instanceof BashSqlParser.Unary_expressionContext) {
+            BashSqlParser.Unary_expressionContext uexpr = (BashSqlParser.Unary_expressionContext) expr;
+            //This is necesseary because of strange awk behaviour (try: print 3";"-3";"+3)
+            return "(0" + getAwkOperator(uexpr.op) + translateSingleExprStmt(uexpr.arg1) + ")";
         } else if (expr instanceof BashSqlParser.FunctionContext) {
 
             // First check whether we have already calculated expression
@@ -60,12 +62,12 @@ public class Expr2AwkTranslater2 implements ExprTranslater {
             BashSqlParser.FunctionContext fExpr = (BashSqlParser.FunctionContext) expr;
             return fExpr.function_name().getText().toLowerCase() + "("
                     + Joiner.on(",").join(Iterables.transform(fExpr.expr(),
-                            new Function<BashSqlParser.ExprContext, String>() {
-                                @Override
-                                public String apply(final BashSqlParser.ExprContext exprContext) {
-                                    return translateSingleExprStmt(exprContext);
-                                }
-                            })) + ")";
+                    new Function<BashSqlParser.ExprContext, String>() {
+                        @Override
+                        public String apply(final BashSqlParser.ExprContext exprContext) {
+                            return translateSingleExprStmt(exprContext);
+                        }
+                    })) + ")";
         } else if (expr instanceof BashSqlParser.Column_name_defContext) {
             return handleColumnName(expr);
         } else if (expr instanceof BashSqlParser.SomethineContext) {
@@ -73,10 +75,13 @@ public class Expr2AwkTranslater2 implements ExprTranslater {
             if (sExpr.literal_value().STRING_LITERAL() != null) {
                 return '"'
                         + escaper.escape(sExpr.literal_value().getText().substring(1,
-                                sExpr.literal_value().getText().length() - 1)) + '"';
+                        sExpr.literal_value().getText().length() - 1)) + '"';
             } else {
                 return sExpr.literal_value().getText();
             }
+        } else if (expr instanceof BashSqlParser.Case_expressionContext) {
+            CaseWhen2AwkTranslater caseWhen2AwkTranslater = new CaseWhen2AwkTranslater();
+            return caseWhen2AwkTranslater.translateSingleExprStmt((BashSqlParser.Case_expressionContext) expr, this);
         }
 
         return null;

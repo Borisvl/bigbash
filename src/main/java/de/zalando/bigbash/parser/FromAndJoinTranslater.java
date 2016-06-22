@@ -1,13 +1,15 @@
 package de.zalando.bigbash.parser;
 
-import java.util.Map;
-
 import de.zalando.bigbash.commands.BashJoinTableJoiner;
 import de.zalando.bigbash.commands.HashJoinTableJoiner;
 import de.zalando.bigbash.commands.TableJoiner;
 import de.zalando.bigbash.entities.BashSqlTable;
+import de.zalando.bigbash.entities.EditPosition;
 import de.zalando.bigbash.entities.JoinType;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlParser;
+
+import java.util.Map;
 
 /**
  * Created by bvonloesch on 6/11/14.
@@ -68,20 +70,24 @@ public class FromAndJoinTranslater {
                 BashSqlParser.ExprContext joinExpr = ctx.join_clause().join_constraint(i).expr();
 
                 if (!("=".equals(joinExpr.getChild(1).getText()) || "==".equals(joinExpr.getChild(1).getText()))) {
-                    throw new RuntimeException("Only equal operator is allowed in join on expression.");
+                    throw new BigBashException("Only equal operator is allowed in join on expression.",
+                            EditPosition.fromContext(joinExpr));
                 }
 
                 BashSqlParser.ExprContext rightSide = (BashSqlParser.ExprContext) joinExpr.getChild(0);
                 if (rightSide.children.size() != 3) {
-                    throw new RuntimeException("You must use tablename.columnname in join expressions");
+                    throw new BigBashException("You must use tablename.columnname in join expressions",
+                            EditPosition.fromContext(rightSide));
                 }
 
                 if (!rightSide.getChild(0).getClass().equals(BashSqlParser.Table_nameContext.class)) {
-                    throw new RuntimeException("You must use tablename.columnname in join expressions");
+                    throw new BigBashException("You must use tablename.columnname in join expressions",
+                            EditPosition.fromContext(rightSide));
                 }
 
                 if (!rightSide.getChild(2).getClass().equals(BashSqlParser.Column_nameContext.class)) {
-                    throw new RuntimeException("You must use tablename.columnname in join expressions");
+                    throw new BigBashException("You must use tablename.columnname in join expressions",
+                            EditPosition.fromContext(rightSide));
                 }
 
                 String column1 = joinExpr.getChild(0).getChild(0).getText() + "."
@@ -97,7 +103,8 @@ public class FromAndJoinTranslater {
                 }
 
                 if (bashSqltable1.getColumnInformation(column1) == null) {
-                    throw new RuntimeException("Could not find column " + column1 + " in table.");
+                    throw new BigBashException("Could not find column " + column1 + " in table.",
+                            EditPosition.fromContext(rightSide));
                 }
 
                 TableJoiner joiner = new BashJoinTableJoiner();

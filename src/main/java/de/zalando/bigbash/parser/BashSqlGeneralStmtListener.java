@@ -4,10 +4,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import de.zalando.bigbash.entities.BashSqlTable;
 import de.zalando.bigbash.entities.CompressionType;
+import de.zalando.bigbash.entities.EditPosition;
 import de.zalando.bigbash.entities.FileMappingProperties;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlBaseListener;
 import de.zalando.bigbash.grammar.BashSqlParser;
-import de.zalando.bigbash.pipes.BashMissingInput;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -51,7 +52,7 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
         if (properties == null) {
             //Throws an error if a select statement tries to read from it
             createdTable.setDelimiter(";");
-            createdTable.setInput(new BashMissingInput("Could not find file mapping for table " + createdTable.getTableName()));
+            //createdTable.setInput(new BashMissingInput("Could not find file mapping for table " + createdTable.getTableName()));
         } else {
             createdTable.setDelimiter(properties.getDelimiter());
             createdTable.setInput(properties.getPipeInput());
@@ -75,14 +76,16 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
             } else if ("FILE".equals(ctxType)) {
                 type = CompressionType.NONE;
             } else {
-                throw new RuntimeException("Unknown type " + ctx.type.getText());
+                throw new BigBashException("Unknown type " + ctx.type.getText(),
+                        EditPosition.fromTokens(ctx.type, ctx.type));
             }
         }
         String delimiter = "\\t";
         if (ctx.delimiter != null) {
             delimiter = getArgument(ctx.delimiter.getText());
             if (delimiter.length() == 0) {
-                throw new RuntimeException("Delimiter must be at least one character");
+                throw new BigBashException("Delimiter must be at least one character",
+                        EditPosition.fromTokens(ctx.delimiter, ctx.delimiter));
             }
         }
         String tableName = ctx.table_name().getText().toLowerCase();
@@ -94,7 +97,8 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
         if (ctx.quote != null) {
             String quote = getArgument(ctx.quote.getText());
             if (quote.length() > 1) {
-                throw new RuntimeException("Quote character must be a single character");
+                throw new BigBashException("Quote character must be a single character",
+                        EditPosition.fromTokens(ctx.quote, ctx.quote));
             }
             quoteChar = Optional.of(quote.charAt(0));
         }
@@ -106,6 +110,9 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
             BashSqlTable table = createdTablespace.get(tableName);
             table.setDelimiter(properties.getDelimiter());
             table.setInput(properties.getPipeInput());
+        } else {
+            throw new BigBashException("Table '" + tableName + "' does not exists.",
+                    EditPosition.fromContext(ctx.table_name()));
         }
     }
 

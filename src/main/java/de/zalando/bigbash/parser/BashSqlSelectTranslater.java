@@ -2,15 +2,10 @@ package de.zalando.bigbash.parser;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import de.zalando.bigbash.commands.TableStripper;
-import de.zalando.bigbash.entities.BashSqlTable;
-import de.zalando.bigbash.entities.JoinType;
-import de.zalando.bigbash.entities.ProgramConfig;
-import de.zalando.bigbash.entities.SelectStmtData;
+import de.zalando.bigbash.entities.*;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlBaseListener;
 import de.zalando.bigbash.grammar.BashSqlListener;
 import de.zalando.bigbash.grammar.BashSqlParser;
@@ -31,7 +26,7 @@ public class BashSqlSelectTranslater {
 
     private final boolean optimizationJoins;
     private final boolean optRemoveUnusedColumns;
-    private final Map<String, BashSqlTable> tables;
+    private Map<String, BashSqlTable> tables;
     private final boolean useSortAggregation;
 
     public BashSqlSelectTranslater(final Map<String, BashSqlTable> tables, boolean useSortAggregation) {
@@ -43,6 +38,9 @@ public class BashSqlSelectTranslater {
     }
 
     public String getSelectExpression(final SelectStmtData selectData) {
+
+        //Remove unsused tables
+        tables = removeUnusedTables(selectData);
 
         // Optimization: Remove unused columns
         if (optRemoveUnusedColumns) {
@@ -107,7 +105,7 @@ public class BashSqlSelectTranslater {
         } else {
             groupByOutput = new HashedGroupBy2AwkParser().parseGroupByStmt(selectData, joinedTable);
         }
-        
+
         if (groupByOutput != null) {
             BashPipe p = new BashPipe(joinedTable.getInput(), new BashCommand(groupByOutput));
             joinedTable.setInput(p);
@@ -153,6 +151,31 @@ public class BashSqlSelectTranslater {
         joinedTable.setInput(p);
 
         return joinedTable.getInput().render();
+    }
+
+    private Map<String, BashSqlTable> removeUnusedTables(SelectStmtData selectData) {
+        final Map<String, BashSqlTable> usedTables = Maps.newHashMap();
+
+        BashSqlListener functionStatementCollector = new BashSqlBaseListener() {
+            @Override
+            public void enterTable_name(@NotNull BashSqlParser.Table_nameContext ctx) {
+                String tableName = ctx.getText();
+                if (!tables.containsKey(tableName.toLowerCase())) {
+                    throw new BigBashException("Table '" + tableName + "' not defined!",
+                            EditPosition.fromContext(ctx));
+                } else if (tables.get(tableName.toLowerCase()).getInput() == null) {
+                    throw new BigBashException("Table '" + tableName + "' has no valid mapping!",
+                            EditPosition.fromContext(ctx));
+                }
+                usedTables.put(tableName.toLowerCase(), tables.get(tableName.toLowerCase()));
+            }
+        };
+
+        ParseTreeWalker walker = new ParseTreeWalker();
+
+        // Collect all used columns
+        walker.walk(functionStatementCollector, selectData.getSelectStmt());
+        return usedTables;
     }
 
     private void prepareTables(final SelectStmtData selectData) {

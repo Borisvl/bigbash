@@ -1,7 +1,7 @@
 grammar BashSql;
 
 parse
- : ( sql_stmt_list | error )* EOF
+ : ( sql_stmt_list )* EOF
  ;
 
 error
@@ -196,7 +196,6 @@ keyword
  | K_AS
  | K_ASC
  | K_ATTACH
- | K_AUTOINCREMENT
  | K_BEFORE
  | K_BEGIN
  | K_BETWEEN
@@ -207,7 +206,6 @@ keyword
  | K_CHECK
  | K_COLLATE
  | K_COLUMN
- | K_COMMIT
  | K_CONFLICT
  | K_CONSTRAINT
  | K_CREATE
@@ -219,11 +217,9 @@ keyword
  | K_DEFAULT
  | K_DEFERRABLE
  | K_DEFERRED
- | K_DELETE
  | K_DESC
  | K_DETACH
  | K_DISTINCT
- | K_DROP
  | K_EACH
  | K_ELSE
  | K_END
@@ -244,7 +240,6 @@ keyword
  | K_IGNORE
  | K_IMMEDIATE
  | K_IN
- | K_INDEX
  | K_INDEXED
  | K_INITIALLY
  | K_INNER
@@ -271,7 +266,6 @@ keyword
  | K_OR
  | K_ORDER
  | K_OUTER
- | K_PLAN
  | K_PRAGMA
  | K_PRIMARY
  | K_QUERY
@@ -287,26 +281,17 @@ keyword
  | K_REPLACE
  | K_RESTRICT
  | K_RIGHT
- | K_ROLLBACK
  | K_ROW
- | K_SAVEPOINT
  | K_SELECT
  | K_SET
  | K_TABLE
- | K_TEMP
- | K_TEMPORARY
  | K_THEN
  | K_TO
- | K_TRANSACTION
- | K_TRIGGER
  | K_UNION
  | K_UNIQUE
- | K_UPDATE
  | K_USING
- | K_VACUUM
  | K_VALUES
  | K_VIEW
- | K_VIRTUAL
  | K_WHEN
  | K_WHERE
  | K_WITH

@@ -1,7 +1,9 @@
 package de.zalando.bigbash.parser;
 
 import de.zalando.bigbash.entities.BashSqlTable;
+import de.zalando.bigbash.entities.EditPosition;
 import de.zalando.bigbash.entities.FieldType;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlBaseListener;
 import de.zalando.bigbash.grammar.BashSqlParser;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -23,11 +25,13 @@ public class BashSqlCreateStmtListener extends BashSqlBaseListener {
 
         // perform some safety checks (despite grammar rules)
         if (createdTable.getTableName() == null || createdTable.getTableName().isEmpty()) {
-            throw new RuntimeException("A table must always have a valid name!");
+            throw new BigBashException("A table must always have a valid name!",
+                    EditPosition.fromContext(ctx.table_name()));
         }
 
         if (createdTable.getColumnCount() == 0) {
-            throw new RuntimeException("A table must always have at least one column!");
+            throw new BigBashException("A table must always have at least one column!",
+                    EditPosition.fromContext(ctx.table_name()));
         }
     }
 

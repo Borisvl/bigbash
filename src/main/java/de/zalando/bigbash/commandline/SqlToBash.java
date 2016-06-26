@@ -1,6 +1,7 @@
 package de.zalando.bigbash.commandline;
 
 import de.zalando.bigbash.service.SqlToBashConverter;
+import de.zalando.bigbash.util.CollectingErrorListener;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -52,7 +53,9 @@ public class SqlToBash {
         if (result.isSuccess()) {
             System.out.println(result.getScript());
         } else {
-            System.err.println(result.getErrors().get(0).toString());
+            for (CollectingErrorListener.SyntaxError error : result.getErrors()) {
+                System.err.println(error);
+            }
         }
     }
 

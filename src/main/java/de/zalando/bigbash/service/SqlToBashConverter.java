@@ -42,7 +42,7 @@ public class SqlToBashConverter {
         }
 
         public boolean isSuccess() {
-            return errors.isEmpty();
+            return errors == null || errors.isEmpty();
         }
 
         @Override
@@ -60,7 +60,7 @@ public class SqlToBashConverter {
             prePut += "export LC_ALL=C; ";
         }
         String postPut = ")";
-        FileMappingProperties.outputDelimiter = outputDelimiter;
+        //FileMappingProperties.outputDelimiter = outputDelimiter;
         Map<String, FileMappingProperties> fileMappingPropertiesMap = Maps.newHashMap();
 
         ANTLRInputStream input = new ANTLRInputStream(sqlStream);
@@ -79,7 +79,7 @@ public class SqlToBashConverter {
         try {
             // Walk the tree created during the parse, trigger callbacks
             BashSqlGeneralStmtListener listener = new BashSqlGeneralStmtListener(fileMappingPropertiesMap,
-                    sortBasedAggregation);
+                    sortBasedAggregation, outputDelimiter);
             walker.walk(listener, tree);
             return new ConversionResult(prePut + listener.getOutput() + postPut, null);
         } catch (BigBashException ex) {

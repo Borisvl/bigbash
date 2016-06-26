@@ -1,5 +1,6 @@
 package de.zalando.bigbash.entities;
 
+import com.google.common.base.Objects;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
@@ -42,5 +43,15 @@ public class EditPosition {
 
     public int getLength() {
         return length;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("line", line)
+                .add("charPositionInLine", charPositionInLine)
+                .add("absoluteCharPosition", absoluteCharPosition)
+                .add("length", length)
+                .toString();
     }
 }

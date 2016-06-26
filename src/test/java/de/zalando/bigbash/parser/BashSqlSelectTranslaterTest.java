@@ -58,7 +58,7 @@ public class BashSqlSelectTranslaterTest {
         table1.addColumn("table1", "appdomain", FieldType.INTEGER, 1);
         table1.addColumn("table1", "misc", FieldType.TEXT, 2);
         table1.setDelimiter(";");
-        table1.setInput(new BashCommand(prop1.getPipeInput().render()));
+        table1.setInput(new BashCommand(prop1.getPipeInput(";").render()));
 
         BashSqlTable table2 = new BashSqlTable();
         table2.setTableName("table2");
@@ -66,7 +66,7 @@ public class BashSqlSelectTranslaterTest {
         table2.addColumn("table2", "blub", FieldType.INTEGER, 1);
         table2.addColumn("table2", "B", FieldType.TEXT, 2);
         table2.setDelimiter(";");
-        table2.setInput(new BashCommand(prop2.getPipeInput().render()));
+        table2.setInput(new BashCommand(prop2.getPipeInput(";").render()));
 
         Map<String, BashSqlTable> tableMap = Maps.newHashMap(ImmutableMap.of("table1", table1, "table2", table2));
 

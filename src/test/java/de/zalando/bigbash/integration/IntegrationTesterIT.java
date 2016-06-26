@@ -41,7 +41,6 @@ public class IntegrationTesterIT {
         this.sql = sql;
         this.tableContent = tableContent;
         this.output = output;
-        FileMappingProperties.outputDelimiter = DELIMITER;
     }
 
     public static Iterator<Object[]> getTestIterator(final BufferedReader reader) {
@@ -135,7 +134,8 @@ public class IntegrationTesterIT {
             }
 
             @Override
-            public void remove() { }
+            public void remove() {
+            }
         };
     }
 
@@ -155,11 +155,11 @@ public class IntegrationTesterIT {
             tableFile.deleteOnExit();
             FileUtils.writeStringToFile(tableFile, table.getValue());
             fileMappingPropertiesMap.put(table.getKey(),
-                new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, DELIMITER));
+                    new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, DELIMITER));
         }
 
         BashCompiler compiler = new BashCompiler();
-        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, false);
+        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, false, DELIMITER);
         BashStarter starter = new BashStarter(".", bashScript);
         String scriptOutput = starter.startScript(bashScript);
         System.out.println(sql);
@@ -180,7 +180,7 @@ public class IntegrationTesterIT {
         }
 
         BashCompiler compiler = new BashCompiler();
-        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true);
+        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true, DELIMITER);
         BashStarter starter = new BashStarter(".", bashScript);
         String scriptOutput = starter.startScript(bashScript);
         System.out.println(sql);

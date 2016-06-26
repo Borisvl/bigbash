@@ -18,13 +18,15 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
 
     protected final Map<String, BashSqlTable> createdTablespace = Maps.newHashMap();
     private final boolean useSortAggregation;
+    private final String outputDelimiter;
     private Map<String, FileMappingProperties> fileMappingPropertiesMap = Maps.newHashMap();
     private String output;
 
     public BashSqlGeneralStmtListener(final Map<String, FileMappingProperties> fileMappingPropertiesMap,
-                                      boolean useSortAggregation) {
+                                      boolean useSortAggregation, String outputDelimiter) {
         this.fileMappingPropertiesMap = fileMappingPropertiesMap;
         this.useSortAggregation = useSortAggregation;
+        this.outputDelimiter = outputDelimiter;
     }
 
     private static String getArgument(@NotNull String text) {
@@ -54,8 +56,8 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
             createdTable.setDelimiter(";");
             //createdTable.setInput(new BashMissingInput("Could not find file mapping for table " + createdTable.getTableName()));
         } else {
-            createdTable.setDelimiter(properties.getDelimiter());
-            createdTable.setInput(properties.getPipeInput());
+            createdTable.setDelimiter(outputDelimiter);
+            createdTable.setInput(properties.getPipeInput(outputDelimiter));
         }
         // store the created table
         createdTablespace.put(createdTable.getTableName(), createdTable);
@@ -108,8 +110,8 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
                 properties);
         if (createdTablespace.containsKey(tableName)) {
             BashSqlTable table = createdTablespace.get(tableName);
-            table.setDelimiter(properties.getDelimiter());
-            table.setInput(properties.getPipeInput());
+            table.setDelimiter(outputDelimiter);
+            table.setInput(properties.getPipeInput(outputDelimiter));
         } else {
             throw new BigBashException("Table '" + tableName + "' does not exists.",
                     EditPosition.fromContext(ctx.table_name()));

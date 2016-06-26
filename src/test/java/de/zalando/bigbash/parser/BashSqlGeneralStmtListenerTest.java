@@ -47,7 +47,7 @@ public class BashSqlGeneralStmtListenerTest {
         FileMappingProperties prop3 = new FileMappingProperties("file3", CompressionType.NONE, ";");
         Map<String, FileMappingProperties> fileMappingPropertiesMap = ImmutableMap.of("testtable", prop1,
                 "anothertable", prop2, "lasttable", prop3);
-        listenerUnderTest = new BashSqlGeneralStmtListener(fileMappingPropertiesMap, false);
+        listenerUnderTest = new BashSqlGeneralStmtListener(fileMappingPropertiesMap, false, ";");
 
         walker.walk(listenerUnderTest, tree);
     }

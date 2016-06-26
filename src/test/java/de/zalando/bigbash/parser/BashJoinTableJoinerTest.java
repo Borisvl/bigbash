@@ -1,17 +1,12 @@
 package de.zalando.bigbash.parser;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import de.zalando.bigbash.commands.BashJoinTableJoiner;
 import de.zalando.bigbash.commands.TableJoiner;
-import de.zalando.bigbash.entities.BashSqlTable;
-import de.zalando.bigbash.entities.CompressionType;
-import de.zalando.bigbash.entities.FieldType;
-import de.zalando.bigbash.entities.FileMappingProperties;
-import de.zalando.bigbash.entities.JoinType;
+import de.zalando.bigbash.entities.*;
 import de.zalando.bigbash.pipes.BashCommand;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by bvonloesch on 6/11/14.
@@ -30,7 +25,7 @@ public class BashJoinTableJoinerTest {
         table1.addColumn(table1Name, "B", FieldType.TEXT, 1);
         table1.addColumn(table1Name, "C", FieldType.TEXT, 2);
         table1.setDelimiter(";");
-        table1.setInput(new BashCommand(prop1.getPipeInput().render()));
+        table1.setInput(new BashCommand(prop1.getPipeInput(";").render()));
 
         BashSqlTable table2 = new BashSqlTable();
         String table2Name = "table2";
@@ -39,7 +34,7 @@ public class BashJoinTableJoinerTest {
         table2.addColumn(table2Name, "D", FieldType.TEXT, 1);
         table2.addColumn(table2Name, "E", FieldType.TEXT, 2);
         table2.setDelimiter(";");
-        table2.setInput(new BashCommand(prop2.getPipeInput().render()));
+        table2.setInput(new BashCommand(prop2.getPipeInput(";").render()));
 
         TableJoiner joiner = new BashJoinTableJoiner();
         BashSqlTable joinedTable = joiner.join(table1, table2, "table1.B", "table2.B", JoinType.INNER);

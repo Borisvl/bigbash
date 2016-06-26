@@ -27,10 +27,12 @@ public class SqlToBashConverter {
     public static class ConversionResult {
         String script;
         List<CollectingErrorListener.SyntaxError> errors;
+        boolean success;
 
         public ConversionResult(String script, List<CollectingErrorListener.SyntaxError> errors) {
             this.script = script;
             this.errors = errors;
+            success = errors == null || errors.isEmpty();
         }
 
         public String getScript() {
@@ -42,7 +44,7 @@ public class SqlToBashConverter {
         }
 
         public boolean isSuccess() {
-            return errors == null || errors.isEmpty();
+            return success;
         }
 
         @Override

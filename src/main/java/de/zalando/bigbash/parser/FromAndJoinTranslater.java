@@ -16,30 +16,6 @@ import java.util.Map;
  */
 public class FromAndJoinTranslater {
 
-    public static class TableAndOutput {
-        final String output;
-        final BashSqlTable table;
-        final String delimiter;
-
-        public TableAndOutput(final String output, final BashSqlTable table, final String delimiter) {
-            this.output = output;
-            this.table = table;
-            this.delimiter = delimiter;
-        }
-
-        public String getOutput() {
-            return output;
-        }
-
-        public BashSqlTable getTable() {
-            return table;
-        }
-
-        public String getDelimiter() {
-            return delimiter;
-        }
-    }
-
     private final Map<String, BashSqlTable> tables;
 
     public FromAndJoinTranslater(final Map<String, BashSqlTable> tables) {
@@ -96,15 +72,40 @@ public class FromAndJoinTranslater {
                 String column2 = joinExpr.getChild(2).getChild(0).getText() + "."
                         + joinExpr.getChild(2).getChild(2).getText();
 
-                if (bashSqltable1.getColumnInformation(column1) == null) {
+                //Check join conditions
+                boolean table1Column1 = bashSqltable1.getColumnInformation(column1) != null;
+                boolean table2Column1 = bashSqlNewTable.getColumnInformation(column1) != null;
+                boolean table1Column2 = bashSqltable1.getColumnInformation(column2) != null;
+                boolean table2Column2 = bashSqlNewTable.getColumnInformation(column2) != null;
+
+                if (table1Column1 && table2Column1) {
+                    throw new BigBashException("Ambigous column name " + column1, EditPosition.fromContext(rightSide));
+                }
+
+                if (table1Column2 && table2Column2) {
+                    throw new BigBashException("Ambigous column name " + column2, EditPosition.fromContext(rightSide));
+                }
+
+                if (!table1Column1 && !table2Column1) {
+                    throw new BigBashException("Unknown column name " + column1, EditPosition.fromContext(rightSide));
+                }
+
+                if (!table1Column2 && !table2Column2) {
+                    throw new BigBashException("Unknown column name " + column2, EditPosition.fromContext(rightSide));
+                }
+
+                if (table1Column1 && table1Column2) {
+                    throw new BigBashException("Unknown join key for left table", EditPosition.fromContext(rightSide));
+                }
+
+                if (table2Column1 && table2Column2) {
+                    throw new BigBashException("Unknown join key for right table", EditPosition.fromContext(rightSide));
+                }
+
+                if (!table1Column1) {
                     String buf = column1;
                     column1 = column2;
                     column2 = buf;
-                }
-
-                if (bashSqltable1.getColumnInformation(column1) == null) {
-                    throw new BigBashException("Could not find column " + column1 + " in table.",
-                            EditPosition.fromContext(rightSide));
                 }
 
                 TableJoiner joiner = new BashJoinTableJoiner();
@@ -112,7 +113,11 @@ public class FromAndJoinTranslater {
                     joiner = new HashJoinTableJoiner();
                 }
 
-                bashSqltable1 = joiner.join(bashSqltable1, bashSqlNewTable, column1, column2, jointype);
+                try {
+                    bashSqltable1 = joiner.join(bashSqltable1, bashSqlNewTable, column1, column2, jointype);
+                } catch (Exception e) {
+                    throw new BigBashException(e.getMessage(), EditPosition.fromContext(ctx.join_clause()));
+                }
 
             }
 

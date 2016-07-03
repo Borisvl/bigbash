@@ -8,9 +8,12 @@ import com.google.common.hash.Hashing;
 import de.zalando.bigbash.commandline.BashCompiler;
 import de.zalando.bigbash.entities.CompressionType;
 import de.zalando.bigbash.entities.FileMappingProperties;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.util.BashStarter;
 import org.apache.commons.io.FileUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -35,6 +38,9 @@ public class IntegrationTesterIT {
     private final String output;
     private final Map<String, String> tableContent;
     private final String sql;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     public IntegrationTesterIT(final String sql, final Map<String, String> tableContent, final String output) {
         super();
@@ -108,7 +114,7 @@ public class IntegrationTesterIT {
                     }
 
                     //Check for hash
-                    if (line.trim().length() > 1 && line.trim().length() == 33) {
+                    if (line.trim().length() > 1 && (line.trim().length() == 33 || line.trim().length() == 6)) {
                         String nextLine = reader.readLine();
                         if (!nextLine.startsWith("-")) {
                             throw new RuntimeException("Expect end of test (---) after hash.");
@@ -158,6 +164,10 @@ public class IntegrationTesterIT {
                     new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, DELIMITER));
         }
 
+        if (output.toLowerCase().equals(">error")) {
+            thrown.expect(BigBashException.class);
+        }
+
         BashCompiler compiler = new BashCompiler();
         String bashScript = compiler.compile(sql, fileMappingPropertiesMap, false, DELIMITER);
         BashStarter starter = new BashStarter(".", bashScript);
@@ -177,6 +187,10 @@ public class IntegrationTesterIT {
             FileUtils.writeStringToFile(tableFile, table.getValue());
             fileMappingPropertiesMap.put(table.getKey(),
                     new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, DELIMITER));
+        }
+
+        if (output.toLowerCase().equals(">error")) {
+            thrown.expect(BigBashException.class);
         }
 
         BashCompiler compiler = new BashCompiler();

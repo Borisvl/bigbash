@@ -137,7 +137,6 @@ public class BashSqlTable {
     }
 
     public Optional<ColumnInformation> getColumnInformation(final BashSqlParser.Column_name_defContext t) {
-        String tableName = null;
 
         String columnName = t.getText().toLowerCase();
 

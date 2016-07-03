@@ -479,7 +479,7 @@ line2;25
 -----------------------
 Create table t(id1 INT, id2 INT, c INT);
 Create table t2(id INT UNIQUE, name TEXT);
-Select name,c from t hash join t2 on t.id1 = t2.id where id1=id2 order by name;
+Select name,c from t hash join t2 on t.Id1 = t2.Id where id1=id2 order by name;
 < t
 1;1;5
 1;2;10
@@ -760,4 +760,27 @@ SELECT CASE WHEN (b-c) >= 0 THEN b-c ELSE -(b-c) END,
 243;240;244;241;242
 245;249;247;248;246
 >e86542e069867cfb60f1ec3aef772ebd
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select * from t join t2 on t.string = t.string;
+< t
+< t2
+>error
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Create table t3(string TEXT, n2 INT);
+Select * from t join t2 on t.string = t2.string join t3 on t.n = t3.n join t3 on t2.n = t3.n;
+< t
+< t2
+< t3
+>error
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select * from t hash right join t2 on t.string = t2.string;
+< t
+< t2
+>error
 -----------------------

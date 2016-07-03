@@ -11,6 +11,8 @@ You might find BigBash useful if:
 - you're a sysop who wants to do simple aggregations without installing a database on your machine
 - you're feeling uncomfortable to spin up a Big Data stack just to crunch a couple gigabytes of data
 
+Head over to [BigBash It!](http://bigbash.it) to try the converter online!
+
 Important Disclaimer
 -----------------
 BigBash is currently not meant for use in production or in a commercial setting. 
@@ -88,9 +90,9 @@ As in the previous example, we first create the tables, mappings, and the _SELEC
     MAP ratings TO 'ratings.dat' DELIMITER '::';
     MAP users TO 'users.dat' DELIMITER '::';
     
-    SELECT title, sum(rating)/count(*) from ratings 
-    hash JOIN movies on movies.id=ratings.movie_id
-    hash JOIN users on users.id=ratings.user_id
+    SELECT title, sum(rating)/count(*) from ratings AS r
+    hash JOIN movies on movies.id=r.movie_id
+    hash JOIN users on users.id=r.user_id
     WHERE age >= 30 and gender ='M'
     GROUP BY title
     HAVING count(*) > 10
@@ -155,10 +157,12 @@ operator, e.g. in _"SELECT \* FROM ..."_, sometimes shows unexpected results.
 * Sub-selects, UNION, IN
 * LIKE (use REGEXP instead)
 * DISTINCT (you can use GROUP BY, though this will not work in some aggregation functions)
-* Aliases, AS operator
+* BETWEEN
+* Column Aliases, AS operator (table aliases work though)
 * Joins that are not equi-joins
 * Implicit joins (use explicit joins instead)
 * Queries without a FROM part
+* Possibly various other stuff you might expect
 
 ### Special Syntax
 In addition to a standard _JOIN_ operator BigBash also supports a special _HASH JOIN_ operator.

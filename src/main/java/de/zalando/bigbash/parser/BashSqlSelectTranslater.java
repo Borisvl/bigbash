@@ -51,12 +51,18 @@ public class BashSqlSelectTranslater {
         if (optimizationJoins) {
             if (selectData.getFromStatementContext().join_clause() != null) {
                 Set<String> joinedTables = Sets.newHashSet();
-                joinedTables.add(selectData.getFromStatementContext().table_or_subquery().table_name().getText()
-                        .toLowerCase());
+                String tableName = selectData.getFromStatementContext().table_or_subquery().table_name().getText();
+                if (selectData.getFromStatementContext().table_or_subquery().table_alias() != null) {
+                    tableName = selectData.getFromStatementContext().table_or_subquery().table_alias().getText();
+                }
+                joinedTables.add(tableName.toLowerCase());
 
                 int nrOfJoins = selectData.getFromStatementContext().join_clause().table_or_subquery().size();
                 for (int i = 0; i < nrOfJoins; i++) {
                     String newTable = selectData.getFromStatementContext().join_clause().table_or_subquery(i).getText();
+                    if (selectData.getFromStatementContext().join_clause().table_or_subquery(i).table_alias() != null) {
+                        newTable = selectData.getFromStatementContext().join_clause().table_or_subquery(i).table_alias().getText();
+                    }
                     BashSqlParser.Join_operatorContext joinOperator = selectData.getFromStatementContext().join_clause()
                             .join_operator(i);
                     JoinType jointype = FromAndJoinTranslater.getJoinType(joinOperator);
@@ -68,11 +74,11 @@ public class BashSqlSelectTranslater {
                 }
 
                 SimpleWhereClauses simpleWhereClauses = new SimpleWhereClauses(tables);
-                for (String tableName : joinedTables) {
+                for (String joinedTableName : joinedTables) {
                     List<BashSqlParser.ExprContext> expressions = simpleWhereClauses.getSingleTableExpressions(
-                            selectData.getWhereExpr(), tableName);
+                            selectData.getWhereExpr(), joinedTableName);
                     if (expressions.size() > 0) {
-                        BashSqlTable table = tables.get(tableName);
+                        BashSqlTable table = tables.get(joinedTableName);
                         WhereTranslater translater = new WhereTranslater(table);
                         BashPipe p = new BashPipe(table.getInput(),
                                 new BashCommand(translater.translateWhereExpression(expressions)));
@@ -158,8 +164,8 @@ public class BashSqlSelectTranslater {
 
         BashSqlListener functionStatementCollector = new BashSqlBaseListener() {
             @Override
-            public void enterTable_name(@NotNull BashSqlParser.Table_nameContext ctx) {
-                String tableName = ctx.getText();
+            public void enterTable_or_subquery(@NotNull BashSqlParser.Table_or_subqueryContext ctx) {
+                String tableName = ctx.table_name().getText();
                 if (!tables.containsKey(tableName.toLowerCase())) {
                     throw new BigBashException("Table '" + tableName + "' not defined!",
                             EditPosition.fromContext(ctx));
@@ -167,7 +173,13 @@ public class BashSqlSelectTranslater {
                     throw new BigBashException("Table '" + tableName + "' has no valid mapping!",
                             EditPosition.fromContext(ctx));
                 }
-                usedTables.put(tableName.toLowerCase(), tables.get(tableName.toLowerCase()));
+                BashSqlTable table = tables.get(tableName.toLowerCase());
+                if (ctx.table_alias() != null) {
+                    usedTables.put(ctx.table_alias().getText().toLowerCase(),
+                            table.createAlias(ctx.table_alias().getText().toLowerCase()));
+                } else {
+                    usedTables.put(tableName.toLowerCase(), table);
+                }
             }
         };
 

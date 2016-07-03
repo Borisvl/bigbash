@@ -19,13 +19,11 @@ public class BashSqlTable {
     public static class ColumnInformation {
         final int columnNr;
         final FieldType type;
-        final BashSqlTable table;
         final boolean unique;
 
-        public ColumnInformation(final int columnNr, final FieldType type, final boolean unique, final BashSqlTable table) {
+        public ColumnInformation(final int columnNr, final FieldType type, final boolean unique) {
             this.columnNr = columnNr;
             this.type = type;
-            this.table = table;
             this.unique = unique;
         }
 
@@ -85,7 +83,7 @@ public class BashSqlTable {
     }
 
     public void addColumn(final String name, final FieldType type, final boolean unique, final int columnNr) {
-        ColumnInformation columnInfo = new ColumnInformation(columnNr, type, unique, this);
+        ColumnInformation columnInfo = new ColumnInformation(columnNr, type, unique);
         columns.put(name.toLowerCase(), columnInfo);
         if (columnCount < columnNr + 1) {
             columnCount = columnNr + 1;
@@ -156,4 +154,16 @@ public class BashSqlTable {
         return columnCount;
     }
 
+    public BashSqlTable createAlias(String name) {
+        BashSqlTable copy = new BashSqlTable();
+        copy.setTableName(name.toLowerCase());
+        copy.setDelimiter(delimiter);
+        copy.setInput(input);
+        copy.columnCount = columnCount;
+        for (Map.Entry<String, ColumnInformation> entry : columns.entrySet()) {
+            String newKey = entry.getKey().replaceFirst("^[^\\.]*", name.toLowerCase());
+            copy.columns.put(newKey, entry.getValue());
+        }
+        return copy;
+    }
 }

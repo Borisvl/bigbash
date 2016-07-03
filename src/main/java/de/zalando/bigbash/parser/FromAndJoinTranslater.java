@@ -24,6 +24,10 @@ public class FromAndJoinTranslater {
 
     public BashSqlTable createJoinExpression(final BashSqlParser.From_statementContext ctx) {
         String table1 = ctx.table_or_subquery().table_name().getText();
+        //Check for alias
+        if (ctx.table_or_subquery().table_alias() != null) {
+            table1 = ctx.table_or_subquery().table_alias().getText();
+        }
         BashSqlTable bashSqltable1 = tables.get(table1.toLowerCase());
 
         if (ctx.join_clause() == null) {
@@ -32,7 +36,10 @@ public class FromAndJoinTranslater {
         } else {
             int nrOfJoins = ctx.join_clause().table_or_subquery().size();
             for (int i = 0; i < nrOfJoins; i++) {
-                String newTable = ctx.join_clause().table_or_subquery(i).getText();
+                String newTable = ctx.join_clause().table_or_subquery(i).table_name().getText();
+                if (ctx.join_clause().table_or_subquery(i).table_alias() != null) {
+                    newTable = ctx.join_clause().table_or_subquery(i).table_alias().getText();
+                }
                 BashSqlParser.Join_operatorContext joinOperator = ctx.join_clause().join_operator(i);
                 JoinType jointype = getJoinType(joinOperator);
 
@@ -42,6 +49,10 @@ public class FromAndJoinTranslater {
                 }
 
                 BashSqlTable bashSqlNewTable = tables.get(newTable.toLowerCase());
+                if (bashSqlNewTable == null) {
+                    throw new BigBashException("Unknown table '" + newTable + "'",
+                            EditPosition.fromContext(ctx.join_clause().table_or_subquery(i)));
+                }
 
                 BashSqlParser.ExprContext joinExpr = ctx.join_clause().join_constraint(i).expr();
 
@@ -79,19 +90,19 @@ public class FromAndJoinTranslater {
                 boolean table2Column2 = bashSqlNewTable.getColumnInformation(column2) != null;
 
                 if (table1Column1 && table2Column1) {
-                    throw new BigBashException("Ambigous column name " + column1, EditPosition.fromContext(rightSide));
+                    throw new BigBashException("Ambigous column name '" + column1 + "'", EditPosition.fromContext(rightSide));
                 }
 
                 if (table1Column2 && table2Column2) {
-                    throw new BigBashException("Ambigous column name " + column2, EditPosition.fromContext(rightSide));
+                    throw new BigBashException("Ambigous column name '" + column2 + "'", EditPosition.fromContext(rightSide));
                 }
 
-                if (!table1Column1 && !table2Column1) {
-                    throw new BigBashException("Unknown column name " + column1, EditPosition.fromContext(rightSide));
+                if ((!table1Column1) && (!table2Column1)) {
+                    throw new BigBashException("Unknown column name '" + column1 + "'", EditPosition.fromContext(rightSide));
                 }
 
-                if (!table1Column2 && !table2Column2) {
-                    throw new BigBashException("Unknown column name " + column2, EditPosition.fromContext(rightSide));
+                if ((!table1Column2) && (!table2Column2)) {
+                    throw new BigBashException("Unknown column name '" + column2 + "'", EditPosition.fromContext(rightSide));
                 }
 
                 if (table1Column1 && table1Column2) {

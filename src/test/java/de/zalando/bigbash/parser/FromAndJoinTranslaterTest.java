@@ -1,19 +1,6 @@
 package de.zalando.bigbash.parser;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.nio.charset.StandardCharsets;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-
-import org.junit.Test;
-
 import com.google.common.collect.ImmutableMap;
-
 import de.zalando.bigbash.entities.BashSqlTable;
 import de.zalando.bigbash.entities.CompressionType;
 import de.zalando.bigbash.entities.FieldType;
@@ -22,6 +9,15 @@ import de.zalando.bigbash.grammar.BashSqlLexer;
 import de.zalando.bigbash.grammar.BashSqlListener;
 import de.zalando.bigbash.grammar.BashSqlParser;
 import de.zalando.bigbash.pipes.BashCommand;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by bvonloesch on 6/11/14.
@@ -67,8 +63,8 @@ public class FromAndJoinTranslaterTest {
 
         FileMappingProperties prop1 = new FileMappingProperties("*.gz", CompressionType.GZ, ";");
         FileMappingProperties prop2 = new FileMappingProperties("app.csv", CompressionType.NONE, ";");
-        table1.setInput(new BashCommand(prop1.getPipeInput().render()));
-        table2.setInput(new BashCommand(prop2.getPipeInput().render()));
+        table1.setInput(new BashCommand(prop1.getPipeInput(";").render()));
+        table2.setInput(new BashCommand(prop2.getPipeInput(";").render()));
 
         FromAndJoinTranslater translater = new FromAndJoinTranslater(tableMap);
         BashSqlSelectListener listener = new BashSqlSelectListener();

@@ -8,6 +8,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.escape.CharEscaperBuilder;
 import com.google.common.escape.Escaper;
 import de.zalando.bigbash.entities.BashSqlTable;
+import de.zalando.bigbash.entities.EditPosition;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlParser;
 import org.antlr.v4.runtime.Token;
 
@@ -121,8 +123,8 @@ public class Expr2AwkTranslater2 implements ExprTranslater {
     private String handleColumnName(final BashSqlParser.ExprContext t) {
         Optional<Integer> nr = getColumnNr(t);
         if (!nr.isPresent()) {
-            throw new RuntimeException("Column name " + t.getText() + " does not exist in table schema "
-                    + table.getTableName());
+            throw new BigBashException("Column name '" + t.getText() + "' does not exist.",
+                    EditPosition.fromContext(t));
         }
 
         return "$" + nr.get().toString();

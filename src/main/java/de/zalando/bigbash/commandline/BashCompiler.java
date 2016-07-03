@@ -26,8 +26,8 @@ public class BashCompiler {
     }
 
     public String compile(final String sql, final Map<String, FileMappingProperties> fileMappingPropertiesMap,
-                          boolean useSortAggregation)
-        throws IOException {
+                          boolean useSortAggregation, String outputDelimiter)
+            throws IOException {
         InputStream stream = new ByteArrayInputStream(sql.getBytes());
         ANTLRInputStream input = new ANTLRInputStream(stream);   // create a lexer that feeds off of input CharStream
         BashSqlLexer lexer = new BashSqlLexer(input);            // create a buffer of tokens pulled from the lexer
@@ -40,7 +40,8 @@ public class BashCompiler {
         ParseTreeWalker walker = new ParseTreeWalker();
 
         // Walk the tree created during the parse, trigger callbacks
-        BashSqlGeneralStmtListener listener = new BashSqlGeneralStmtListener(fileMappingPropertiesMap, useSortAggregation);
+        BashSqlGeneralStmtListener listener = new BashSqlGeneralStmtListener(fileMappingPropertiesMap, useSortAggregation,
+                outputDelimiter);
         walker.walk(listener, tree);
         return listener.getOutput();
     }

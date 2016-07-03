@@ -1,33 +1,24 @@
 package de.zalando.bigbash.entities;
 
 import com.google.common.base.Optional;
-import de.zalando.bigbash.pipes.BashCommand;
-import de.zalando.bigbash.pipes.BashFileInput;
-import de.zalando.bigbash.pipes.BashGzFileInput;
-import de.zalando.bigbash.pipes.BashInput;
-import de.zalando.bigbash.pipes.BashPipe;
-import de.zalando.bigbash.pipes.BashRemoveHeaderInput;
-import de.zalando.bigbash.pipes.DelimiterAndQuoteConverter;
-import de.zalando.bigbash.pipes.DelimiterConverter;
+import de.zalando.bigbash.pipes.*;
 import org.aeonbits.owner.ConfigCache;
 
 /**
  * Created by bvonloesch on 6/11/14.
  */
 public class FileMappingProperties {
-    public static String outputDelimiter = "\\t";
     private final String files;
     private final CompressionType compressionType;
     private final String delimiter;
     private final boolean removeHeader;
     private final Optional<Character> quoteChar;
-    //private String outputDelimiter;
 
     public FileMappingProperties(final String files, final CompressionType compressionType, final String delimiter) {
         this(files, compressionType, delimiter, false, Optional.<Character>absent());
     }
 
-    public FileMappingProperties(final String files, final CompressionType compressionType, final String delimiter, 
+    public FileMappingProperties(final String files, final CompressionType compressionType, final String delimiter,
                                  boolean removeHeader, Optional<Character> quoteChar) {
         this.files = files;
         this.compressionType = compressionType;
@@ -36,26 +27,17 @@ public class FileMappingProperties {
         this.quoteChar = quoteChar;
     }
 
-    // public String getFiles() {
-    // return files;
-    // }
-
-    public String getDelimiter() {
-        return outputDelimiter;
-    }
-
-    public BashInput getPipeInput() {
+    public BashInput getPipeInput(String outputDelimiter) {
         ProgramConfig programConfig = ConfigCache.getOrCreate(ProgramConfig.class);
-        
+
         if (compressionType == CompressionType.GZ) {
             BashInput input = new BashGzFileInput(files);
             if (removeHeader) {
-                input = new BashRemoveHeaderInput(files, new BashGzFileInput("{}"));                
+                input = new BashRemoveHeaderInput(files, new BashGzFileInput("{}"));
             }
             if (quoteChar.isPresent()) {
                 input = new BashPipe(input, new DelimiterAndQuoteConverter(delimiter, outputDelimiter, quoteChar.get()));
-            }
-            else if (!delimiter.equals(outputDelimiter)) {
+            } else if (!delimiter.equals(outputDelimiter)) {
                 input = new BashPipe(input, new DelimiterConverter(delimiter, outputDelimiter));
             }
             return input;
@@ -66,8 +48,7 @@ public class FileMappingProperties {
             }
             if (quoteChar.isPresent()) {
                 input = new BashPipe(input, new DelimiterAndQuoteConverter(delimiter, outputDelimiter, quoteChar.get()));
-            }
-            else if (!delimiter.equals(outputDelimiter)) {
+            } else if (!delimiter.equals(outputDelimiter)) {
                 input = new BashPipe(input, new DelimiterConverter(delimiter, outputDelimiter));
             }
             return input;
@@ -88,8 +69,7 @@ public class FileMappingProperties {
             BashInput input = new BashCommand(command);
             if (quoteChar.isPresent()) {
                 input = new BashPipe(input, new DelimiterAndQuoteConverter(delimiter, outputDelimiter, quoteChar.get()));
-            }
-            else if (!delimiter.equals(outputDelimiter)) {
+            } else if (!delimiter.equals(outputDelimiter)) {
                 input = new BashPipe(input, new DelimiterConverter(delimiter, outputDelimiter));
             }
             return input;

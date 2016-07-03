@@ -29,15 +29,17 @@ public class HashJoinTableJoiner implements TableJoiner {
         Preconditions.checkArgument(columnName2.indexOf('.') > 0);
 
         if (joinType == JoinType.RIGHT || joinType == JoinType.OUTER) {
-            throw new RuntimeException("Only inner and left hash joins are supported. Use a normal join instead.");
+            throw new IllegalArgumentException("Only inner and left hash joins are supported. Use a normal join instead.");
         }
 
         BashSqlTable newTable = new BashSqlTable();
         newTable.setDelimiter(table1.getDelimiter());
 
-        List<Integer> table1Output = Lists.newArrayList();
 
         int columnNr = 0;
+
+        List<Integer> table1Output = Lists.newArrayList();
+        final boolean column2Unique = table2.getColumnInformation(columnName2).isUnique();
         for (int i = 0; i < table1.getColumnCount(); i++) {
             String columnName = table1.getColumnNameFromColumnNr(i);
 
@@ -46,11 +48,12 @@ public class HashJoinTableJoiner implements TableJoiner {
             BashSqlTable.ColumnInformation columnInfo = table1.getColumnInformation(columnName);
 
             //Column is guaranteed to stay unique if joined field is also unique
-            boolean stayUnique = table2.getColumnInformation(columnName2).isUnique() && columnInfo.isUnique();
+            boolean stayUnique = column2Unique && columnInfo.isUnique();
             newTable.addColumn(columnName, columnInfo.getType(), stayUnique, columnNr++);
         }
 
         List<Integer> table2Output = Lists.newArrayList();
+        final boolean column1Unique = table1.getColumnInformation(columnName1).isUnique();
         for (int i = 0; i < table2.getColumnCount(); i++) {
             String columnName = table2.getColumnNameFromColumnNr(i);
 
@@ -59,7 +62,7 @@ public class HashJoinTableJoiner implements TableJoiner {
             BashSqlTable.ColumnInformation columnInfo = table2.getColumnInformation(columnName);
 
             //Column is guaranteed to stay unique if joined field is also unique
-            boolean stayUnique = table1.getColumnInformation(columnName1).isUnique() && columnInfo.isUnique();
+            boolean stayUnique = column1Unique && columnInfo.isUnique();
             newTable.addColumn(columnName, columnInfo.getType(), stayUnique, columnNr++);
         }
 

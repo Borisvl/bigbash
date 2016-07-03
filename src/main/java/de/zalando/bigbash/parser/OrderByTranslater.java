@@ -1,8 +1,10 @@
 package de.zalando.bigbash.parser;
 
 import de.zalando.bigbash.entities.BashSqlTable;
+import de.zalando.bigbash.entities.EditPosition;
 import de.zalando.bigbash.entities.FieldType;
 import de.zalando.bigbash.entities.ProgramConfig;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlParser;
 import org.aeonbits.owner.ConfigCache;
 
@@ -42,6 +44,7 @@ public class OrderByTranslater {
             return table.getColumnInformation(columnName);
         }
 
-        throw new RuntimeException("Only columns are allowed in order by expressions");
+        throw new BigBashException("Only columns are allowed in order by expressions",
+                EditPosition.fromContext(expr));
     }
 }

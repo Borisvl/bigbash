@@ -2,15 +2,10 @@ package de.zalando.bigbash.parser;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import de.zalando.bigbash.commands.TableStripper;
-import de.zalando.bigbash.entities.BashSqlTable;
-import de.zalando.bigbash.entities.JoinType;
-import de.zalando.bigbash.entities.ProgramConfig;
-import de.zalando.bigbash.entities.SelectStmtData;
+import de.zalando.bigbash.entities.*;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlBaseListener;
 import de.zalando.bigbash.grammar.BashSqlListener;
 import de.zalando.bigbash.grammar.BashSqlParser;
@@ -31,7 +26,7 @@ public class BashSqlSelectTranslater {
 
     private final boolean optimizationJoins;
     private final boolean optRemoveUnusedColumns;
-    private final Map<String, BashSqlTable> tables;
+    private Map<String, BashSqlTable> tables;
     private final boolean useSortAggregation;
 
     public BashSqlSelectTranslater(final Map<String, BashSqlTable> tables, boolean useSortAggregation) {
@@ -44,6 +39,9 @@ public class BashSqlSelectTranslater {
 
     public String getSelectExpression(final SelectStmtData selectData) {
 
+        //Remove unsused tables
+        tables = removeUnusedTables(selectData);
+
         // Optimization: Remove unused columns
         if (optRemoveUnusedColumns) {
             prepareTables(selectData);
@@ -53,12 +51,18 @@ public class BashSqlSelectTranslater {
         if (optimizationJoins) {
             if (selectData.getFromStatementContext().join_clause() != null) {
                 Set<String> joinedTables = Sets.newHashSet();
-                joinedTables.add(selectData.getFromStatementContext().table_or_subquery().table_name().getText()
-                        .toLowerCase());
+                String tableName = selectData.getFromStatementContext().table_or_subquery().table_name().getText();
+                if (selectData.getFromStatementContext().table_or_subquery().table_alias() != null) {
+                    tableName = selectData.getFromStatementContext().table_or_subquery().table_alias().getText();
+                }
+                joinedTables.add(tableName.toLowerCase());
 
                 int nrOfJoins = selectData.getFromStatementContext().join_clause().table_or_subquery().size();
                 for (int i = 0; i < nrOfJoins; i++) {
                     String newTable = selectData.getFromStatementContext().join_clause().table_or_subquery(i).getText();
+                    if (selectData.getFromStatementContext().join_clause().table_or_subquery(i).table_alias() != null) {
+                        newTable = selectData.getFromStatementContext().join_clause().table_or_subquery(i).table_alias().getText();
+                    }
                     BashSqlParser.Join_operatorContext joinOperator = selectData.getFromStatementContext().join_clause()
                             .join_operator(i);
                     JoinType jointype = FromAndJoinTranslater.getJoinType(joinOperator);
@@ -70,11 +74,11 @@ public class BashSqlSelectTranslater {
                 }
 
                 SimpleWhereClauses simpleWhereClauses = new SimpleWhereClauses(tables);
-                for (String tableName : joinedTables) {
+                for (String joinedTableName : joinedTables) {
                     List<BashSqlParser.ExprContext> expressions = simpleWhereClauses.getSingleTableExpressions(
-                            selectData.getWhereExpr(), tableName);
+                            selectData.getWhereExpr(), joinedTableName);
                     if (expressions.size() > 0) {
-                        BashSqlTable table = tables.get(tableName);
+                        BashSqlTable table = tables.get(joinedTableName);
                         WhereTranslater translater = new WhereTranslater(table);
                         BashPipe p = new BashPipe(table.getInput(),
                                 new BashCommand(translater.translateWhereExpression(expressions)));
@@ -107,7 +111,7 @@ public class BashSqlSelectTranslater {
         } else {
             groupByOutput = new HashedGroupBy2AwkParser().parseGroupByStmt(selectData, joinedTable);
         }
-        
+
         if (groupByOutput != null) {
             BashPipe p = new BashPipe(joinedTable.getInput(), new BashCommand(groupByOutput));
             joinedTable.setInput(p);
@@ -153,6 +157,37 @@ public class BashSqlSelectTranslater {
         joinedTable.setInput(p);
 
         return joinedTable.getInput().render();
+    }
+
+    private Map<String, BashSqlTable> removeUnusedTables(SelectStmtData selectData) {
+        final Map<String, BashSqlTable> usedTables = Maps.newHashMap();
+
+        BashSqlListener functionStatementCollector = new BashSqlBaseListener() {
+            @Override
+            public void enterTable_or_subquery(@NotNull BashSqlParser.Table_or_subqueryContext ctx) {
+                String tableName = ctx.table_name().getText();
+                if (!tables.containsKey(tableName.toLowerCase())) {
+                    throw new BigBashException("Table '" + tableName + "' not defined!",
+                            EditPosition.fromContext(ctx));
+                } else if (tables.get(tableName.toLowerCase()).getInput() == null) {
+                    throw new BigBashException("Table '" + tableName + "' has no valid mapping!",
+                            EditPosition.fromContext(ctx));
+                }
+                BashSqlTable table = tables.get(tableName.toLowerCase());
+                if (ctx.table_alias() != null) {
+                    usedTables.put(ctx.table_alias().getText().toLowerCase(),
+                            table.createAlias(ctx.table_alias().getText().toLowerCase()));
+                } else {
+                    usedTables.put(tableName.toLowerCase(), table);
+                }
+            }
+        };
+
+        ParseTreeWalker walker = new ParseTreeWalker();
+
+        // Collect all used columns
+        walker.walk(functionStatementCollector, selectData.getSelectStmt());
+        return usedTables;
     }
 
     private void prepareTables(final SelectStmtData selectData) {

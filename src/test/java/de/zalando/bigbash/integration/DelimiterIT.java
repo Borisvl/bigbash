@@ -30,9 +30,8 @@ public class DelimiterIT {
         fileMappingPropertiesMap.put("test",
                 new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, ",",
                         false, Optional.of('\'')));
-        FileMappingProperties.outputDelimiter = ";";
         BashCompiler compiler = new BashCompiler();
-        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true);
+        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true, ";");
         BashStarter starter = new BashStarter(".", bashScript);
         String scriptOutput = starter.startScript(bashScript);
         System.out.println(sql);
@@ -52,9 +51,8 @@ public class DelimiterIT {
         fileMappingPropertiesMap.put("test",
                 new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, ",",
                         false, Optional.<Character>absent()));
-        FileMappingProperties.outputDelimiter = ";";
         BashCompiler compiler = new BashCompiler();
-        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true);
+        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true, ";");
         BashStarter starter = new BashStarter(".", bashScript);
         String scriptOutput = starter.startScript(bashScript);
         System.out.println(sql);
@@ -74,9 +72,8 @@ public class DelimiterIT {
         fileMappingPropertiesMap.put("test",
                 new FileMappingProperties(tableFile.getAbsolutePath(), CompressionType.NONE, "::",
                         false, Optional.<Character>absent()));
-        FileMappingProperties.outputDelimiter = "\\t";
         BashCompiler compiler = new BashCompiler();
-        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true);
+        String bashScript = compiler.compile(sql, fileMappingPropertiesMap, true, "\\t");
         BashStarter starter = new BashStarter(".", bashScript);
         String scriptOutput = starter.startScript(bashScript);
         System.out.println(sql);

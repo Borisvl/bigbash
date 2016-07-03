@@ -1,7 +1,7 @@
 grammar BashSql;
 
 parse
- : ( sql_stmt_list | error )* EOF
+ : ( sql_stmt_list )* EOF
  ;
 
 error
@@ -185,9 +185,7 @@ column_alias
  ;
 
 keyword
- : K_ABORT
- | K_ACTION
- | K_ADD
+ : K_ADD
  | K_AFTER
  | K_ALL
  | K_ALTER
@@ -196,7 +194,6 @@ keyword
  | K_AS
  | K_ASC
  | K_ATTACH
- | K_AUTOINCREMENT
  | K_BEFORE
  | K_BEGIN
  | K_BETWEEN
@@ -207,7 +204,6 @@ keyword
  | K_CHECK
  | K_COLLATE
  | K_COLUMN
- | K_COMMIT
  | K_CONFLICT
  | K_CONSTRAINT
  | K_CREATE
@@ -219,17 +215,13 @@ keyword
  | K_DEFAULT
  | K_DEFERRABLE
  | K_DEFERRED
- | K_DELETE
  | K_DESC
  | K_DETACH
  | K_DISTINCT
- | K_DROP
  | K_EACH
  | K_ELSE
  | K_END
  | K_ESCAPE
- | K_EXCEPT
- | K_EXCLUSIVE
  | K_EXISTS
  | K_EXPLAIN
  | K_FAIL
@@ -242,11 +234,7 @@ keyword
  | K_HAVING
  | K_IF
  | K_IGNORE
- | K_IMMEDIATE
  | K_IN
- | K_INDEX
- | K_INDEXED
- | K_INITIALLY
  | K_INNER
  | K_INSERT
  | K_INSTEAD
@@ -271,7 +259,6 @@ keyword
  | K_OR
  | K_ORDER
  | K_OUTER
- | K_PLAN
  | K_PRAGMA
  | K_PRIMARY
  | K_QUERY
@@ -287,26 +274,17 @@ keyword
  | K_REPLACE
  | K_RESTRICT
  | K_RIGHT
- | K_ROLLBACK
  | K_ROW
- | K_SAVEPOINT
  | K_SELECT
  | K_SET
  | K_TABLE
- | K_TEMP
- | K_TEMPORARY
  | K_THEN
  | K_TO
- | K_TRANSACTION
- | K_TRIGGER
  | K_UNION
  | K_UNIQUE
- | K_UPDATE
  | K_USING
- | K_VACUUM
  | K_VALUES
  | K_VIEW
- | K_VIRTUAL
  | K_WHEN
  | K_WHERE
  | K_WITH
@@ -416,8 +394,6 @@ NOT_EQ1 : '!=';
 NOT_EQ2 : '<>';
 
 // http://www.sqlite.org/lang_keywords.html
-K_ABORT : A B O R T;
-K_ACTION : A C T I O N;
 K_ADD : A D D;
 K_AFTER : A F T E R;
 K_ALL : A L L;
@@ -427,7 +403,6 @@ K_AND : A N D;
 K_AS : A S;
 K_ASC : A S C;
 K_ATTACH : A T T A C H;
-K_AUTOINCREMENT : A U T O I N C R E M E N T;
 K_BEFORE : B E F O R E;
 K_BEGIN : B E G I N;
 K_BETWEEN : B E T W E E N;
@@ -455,13 +430,10 @@ K_DELIMITER : D E L I M I T E R;
 K_DESC : D E S C;
 K_DETACH : D E T A C H;
 K_DISTINCT : D I S T I N C T;
-K_DROP : D R O P;
 K_EACH : E A C H;
 K_ELSE : E L S E;
 K_END : E N D;
 K_ESCAPE : E S C A P E;
-K_EXCEPT : E X C E P T;
-K_EXCLUSIVE : E X C L U S I V E;
 K_EXISTS : E X I S T S;
 K_EXPLAIN : E X P L A I N;
 K_FAIL : F A I L;
@@ -475,11 +447,7 @@ K_HAVING : H A V I N G;
 K_HASH : H A S H;
 K_IF : I F;
 K_IGNORE : I G N O R E;
-K_IMMEDIATE : I M M E D I A T E;
 K_IN : I N;
-K_INDEX : I N D E X;
-K_INDEXED : I N D E X E D;
-K_INITIALLY : I N I T I A L L Y;
 K_INNER : I N N E R;
 K_INSERT : I N S E R T;
 K_INSTEAD : I N S T E A D;
@@ -523,22 +491,17 @@ K_RESTRICT : R E S T R I C T;
 K_RIGHT : R I G H T;
 K_ROLLBACK : R O L L B A C K;
 K_ROW : R O W;
-K_SAVEPOINT : S A V E P O I N T;
 K_SELECT : S E L E C T;
 K_SET : S E T;
 K_TABLE : T A B L E;
 K_TEMP : T E M P;
-K_TEMPORARY : T E M P O R A R Y;
 K_THEN : T H E N;
 K_TO : T O;
-K_TRANSACTION : T R A N S A C T I O N;
 K_TYPE : T Y P E;
-K_TRIGGER : T R I G G E R;
 K_UNION : U N I O N;
 K_UNIQUE : U N I Q U E;
 K_UPDATE : U P D A T E;
 K_USING : U S I N G;
-K_VACUUM : V A C U U M;
 K_VALUES : V A L U E S;
 K_VIEW : V I E W;
 K_VIRTUAL : V I R T U A L;

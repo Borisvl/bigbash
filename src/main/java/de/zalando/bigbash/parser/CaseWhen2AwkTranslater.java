@@ -1,5 +1,7 @@
 package de.zalando.bigbash.parser;
 
+import de.zalando.bigbash.entities.EditPosition;
+import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlParser;
 
 /**
@@ -17,7 +19,7 @@ public class CaseWhen2AwkTranslater {
             int nrOfWhereThenParts = expr.expr().size() - 1;
             if (expr.K_ELSE() != null) nrOfWhereThenParts--;
             if (nrOfWhereThenParts % 2 != 0) {
-                throw new RuntimeException("Something wrong with CASE statement");
+                throw new BigBashException("Something wrong with CASE statement", EditPosition.fromContext(expr));
             }
             nrOfWhereThenParts /= 2;
 
@@ -33,7 +35,8 @@ public class CaseWhen2AwkTranslater {
             int nrOfWhereThenParts = expr.expr().size();
             if (expr.K_ELSE() != null) nrOfWhereThenParts--;
             if (nrOfWhereThenParts % 2 != 0) {
-                throw new RuntimeException("Something wrong with CASE statement");
+                throw new BigBashException("Something wrong with CASE statement",
+                        EditPosition.fromContext(expr));
             }
             nrOfWhereThenParts /= 2;
 

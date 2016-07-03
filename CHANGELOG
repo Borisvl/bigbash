@@ -1,3 +1,6 @@
+2016-07-03
+- Refactoring of Exceptions and main job
+- Add support for table aliases
 2016-06-07
 - Add support for CASE...WHEN...THEN
 - Fix missing support for unary operators (-,+)

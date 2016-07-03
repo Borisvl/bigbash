@@ -479,7 +479,7 @@ line2;25
 -----------------------
 Create table t(id1 INT, id2 INT, c INT);
 Create table t2(id INT UNIQUE, name TEXT);
-Select name,c from t hash join t2 on t.id1 = t2.id where id1=id2 order by name;
+Select name,c from t hash join t2 on t.Id1 = t2.Id where id1=id2 order by name;
 < t
 1;1;5
 1;2;10
@@ -760,4 +760,111 @@ SELECT CASE WHEN (b-c) >= 0 THEN b-c ELSE -(b-c) END,
 243;240;244;241;242
 245;249;247;248;246
 >e86542e069867cfb60f1ec3aef772ebd
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select * from t join t2 on t.string = t.string;
+< t
+< t2
+>error
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n INT);
+Create table t3(string TEXT, n2 INT);
+Select * from t join t2 on t.string = t2.string join t3 on t.n = t3.n2 join t3 on t2.n = t3.n2;
+< t
+< t2
+< t3
+>error
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n2 INT);
+Select * from t hash right join t2 on t.string = t2.string;
+< t
+< t2
+>error
+-----------------------
+Create table t(string TEXT, n INT);
+Select sum(2*t2.n), 2*sum(t2.n) from t AS t2;
+< t
+line1;1
+line2;2
+>
+6;6
+-----------------------
+Create table t(string TEXT, n INT);
+Select sum(2*t.n), 2*sum(t.n) from t AS t2;
+< t
+line1;1
+line2;2
+>error
+-----------------------
+Create table t(string TEXT, n INT);
+Select sum(2*n), 2*sum(n) from t AS t2;
+< t
+line1;1
+line2;2
+>
+6;6
+-----------------------
+Create table t(string TEXT, n INT);
+Create table t2(string TEXT, n INT);
+Create table t3(string TEXT, n2 INT);
+Select * from t join t2 on t.string = t2.string join t3 on t.n = t3.n2 join t3 AS t4 on t2.n = t4.n2;
+< t
+< t2
+< t3
+>
+-----------------------
+Create table t(uid INT, n INT);
+Create table names(id INT, name TEXT);
+Select names.name, names2.name from t
+join t AS t2 on t.uid = t2.uid join names on t.n = names.id join names AS names2 on t2.n = names2.id
+ORDER BY names.name, names2.name;
+< t
+1;1
+1;2
+1;3
+2;1
+2;2
+< names
+1;"n1"
+2;"n2"
+3;"n3"
+>
+"n1";"n1"
+"n1";"n1"
+"n1";"n2"
+"n1";"n2"
+"n1";"n3"
+"n2";"n1"
+"n2";"n1"
+"n2";"n2"
+"n2";"n2"
+"n2";"n3"
+"n3";"n1"
+"n3";"n2"
+"n3";"n3"
+-----------------------
+Create table t(uid INT, n INT);
+Create table names(id INT, name TEXT);
+Select n.name, n2.name, COUNT(*) from t
+join t AS t2 on t.uid = t2.uid join names AS n on t.n = N.ID hash join names AS n2 on t2.n = n2.id
+WHERE t.n < t2.n
+GROUP by N.id, n2.id
+ORDER BY n.name, N2.Name;
+< t
+1;1
+1;2
+1;3
+2;1
+2;2
+< names
+1;"n1"
+2;"n2"
+3;"n3"
+>
+"n1";"n2";2
+"n1";"n3";1
+"n2";"n3";1
 -----------------------

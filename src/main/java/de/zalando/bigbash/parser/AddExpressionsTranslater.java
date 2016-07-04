@@ -16,12 +16,15 @@ import java.util.List;
 public class AddExpressionsTranslater {
 
     private final BashSqlTable table;
+    private boolean addedColumns;
 
     public AddExpressionsTranslater(final BashSqlTable table) {
         this.table = table;
+        addedColumns = false;
     }
 
     public BashSqlTable addExpressionsTranslator(final List<BashSqlParser.ExprContext> exprs) {
+        addedColumns = false;
         if (exprs == null) {
             return table;
         }
@@ -48,11 +51,16 @@ public class AddExpressionsTranslater {
         }
 
         if (addColumns) {
+            addedColumns = true;
             String awkOutput = String.format("%s 'BEGIN{FS=OFS=\"%s\"}{print %s}'",
                     ConfigCache.getOrCreate(ProgramConfig.class).awk(), table.getDelimiter(), output.toString());
             table.setInput(new BashPipe(table.getInput(), new BashCommand(awkOutput)));
         }
 
         return table;
+    }
+
+    public boolean isAddedColumns() {
+        return addedColumns;
     }
 }

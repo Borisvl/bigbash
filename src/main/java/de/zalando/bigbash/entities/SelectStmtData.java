@@ -1,10 +1,9 @@
 package de.zalando.bigbash.entities;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
 import de.zalando.bigbash.grammar.BashSqlParser;
+
+import java.util.List;
 
 /**
  * Created by bvonloesch on 6/10/14.
@@ -109,5 +108,9 @@ public class SelectStmtData {
 
     public BashSqlParser.Select_stmtContext getSelectStmt() {
         return selectStmt;
+    }
+
+    public boolean isDistinctQuery() {
+        return selectStmt.K_DISTINCT() != null;
     }
 }

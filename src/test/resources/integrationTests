@@ -868,3 +868,15 @@ ORDER BY n.name, N2.Name;
 "n1";"n3";1
 "n2";"n3";1
 -----------------------
+Create table t(a,b);
+Create table t2(a2,b2);
+select t.* from t join t2 on t.a=t2.a2 order by a;
+< t
+1;2
+2;3
+< t2
+1;1
+2;2
+>
+1;2
+2;3

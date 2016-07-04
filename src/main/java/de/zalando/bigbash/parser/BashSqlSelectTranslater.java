@@ -39,6 +39,13 @@ public class BashSqlSelectTranslater {
 
     public String getSelectExpression(final SelectStmtData selectData) {
 
+        //Check
+        if (selectData.isDistinctQuery() && selectData.getGroupByExpr() != null
+                && selectData.getGroupByExpr().size() > 0) {
+            throw new BigBashException("Cannot use DISTINCT and GROUP BY together in a query.",
+                    EditPosition.fromContext(selectData.getSelectStmt()));
+        }
+
         //Remove unsused tables
         tables = removeUnusedTables(selectData);
 
@@ -125,6 +132,22 @@ public class BashSqlSelectTranslater {
             joinedTable.setInput(p);
         }
 
+        if (selectData.isDistinctQuery()) {
+            //Distinct keyword is present
+            throw new BigBashException("DISTINCT keyword not supported at the moment",
+                    EditPosition.fromContext(selectData.getSelectStmt()));
+
+            //First assemble the returned columns
+//            ReturnColumnsTranslater returnColumnsTranslater = new ReturnColumnsTranslater(joinedTable);
+//            BashPipe p = new BashPipe(joinedTable.getInput(),
+//                    new BashCommand(returnColumnsTranslater.translateReturnColumns(selectData.getReturnColumnsExpr())));
+//            joinedTable.setInput(p);
+//
+//            DistinctTranslater distinctTranslater = new DistinctTranslater();
+//            BashPipe p2 = new BashPipe(joinedTable.getInput(), new BashCommand(distinctTranslater.createDistinctOutput()));
+//            joinedTable.setInput(p2);
+        }
+
         // ORDER BY
         if (selectData.getOrderByContext() != null) {
             addExpressionsTranslater = new AddExpressionsTranslater(joinedTable);
@@ -133,7 +156,6 @@ public class BashSqlSelectTranslater {
             for (BashSqlParser.Ordering_termContext orderingterm : selectData.getOrderByContext().ordering_term()) {
                 l.add(orderingterm.expr());
             }
-
             joinedTable = addExpressionsTranslater.addExpressionsTranslator(l);
 
             OrderByTranslater orderByTranslater = new OrderByTranslater(joinedTable);
@@ -200,6 +222,14 @@ public class BashSqlSelectTranslater {
                     if (info.isPresent()) {
                         columns.put(table, info.get());
                     }
+                }
+            }
+
+            @Override
+            public void enterResult_column_tableStar(@NotNull BashSqlParser.Result_column_tableStarContext ctx) {
+                BashSqlTable table = tables.get(ctx.table_name().getText().toLowerCase());
+                if (table != null) {
+                    columns.putAll(table, table.getColumns().values());
                 }
             }
         };

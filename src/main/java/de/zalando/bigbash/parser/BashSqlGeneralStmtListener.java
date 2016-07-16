@@ -95,6 +95,12 @@ public class BashSqlGeneralStmtListener extends BashSqlBaseListener {
         if (ctx.K_REMOVEHEADER() != null) {
             removeHeader = true;
         }
+
+        if (removeHeader && type == CompressionType.RAW) {
+            throw new BigBashException("Cannot remove header for input of type 'RAW'",
+                    EditPosition.fromContext(ctx));
+        }
+
         Optional<Character> quoteChar = Optional.absent();
         if (ctx.quote != null) {
             String quote = getArgument(ctx.quote.getText());

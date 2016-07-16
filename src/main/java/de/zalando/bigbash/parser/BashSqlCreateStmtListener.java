@@ -52,8 +52,12 @@ public class BashSqlCreateStmtListener extends BashSqlBaseListener {
             }
         }
 
-
-        createdTable.addColumn(createdTable.getTableName(), ctx.getChild(0).getChild(0).getText(), type, unique, columnNr);
+        String columnName = ctx.getChild(0).getChild(0).getText();
+        if (createdTable.getColumnInformation(columnName) != null) {
+            throw new BigBashException("Column '" + columnName + "' already exists in table '" + createdTable.getTableName() + "'.",
+                    EditPosition.fromContext(ctx));
+        }
+        createdTable.addColumn(createdTable.getTableName(), columnName, type, unique, columnNr);
         columnNr++;
     }
 

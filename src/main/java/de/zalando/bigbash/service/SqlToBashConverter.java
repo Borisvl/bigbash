@@ -3,6 +3,7 @@ package de.zalando.bigbash.service;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import de.zalando.bigbash.entities.EditPosition;
 import de.zalando.bigbash.entities.FileMappingProperties;
 import de.zalando.bigbash.exceptions.BigBashException;
 import de.zalando.bigbash.grammar.BashSqlLexer;
@@ -87,6 +88,10 @@ public class SqlToBashConverter {
         } catch (BigBashException ex) {
             return new ConversionResult(null, ImmutableList.of(
                     new CollectingErrorListener.SyntaxError(ex.getPosition(), ex.getMessage())));
+        } catch (RuntimeException ex) {
+            //Fallback
+            return new ConversionResult(null, ImmutableList.of(
+                    new CollectingErrorListener.SyntaxError(new EditPosition(1, 1, 1, 1), ex.getMessage())));
         }
     }
 
